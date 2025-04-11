@@ -1,6 +1,8 @@
 create EXTENSION if not exists cube;
 create EXTENSION  if not exists  earthdistance;
 
+--  SELECT earth_distance(ll_to_earth(t.geo_lat, t.geo_lng), ll_to_earth(34.052235, -118.243683)) AS distance from contractor  t;
+
 
 create table if not exists contractor.contractor
 (
@@ -15,15 +17,16 @@ create table if not exists contractor.contractor
     zip             varchar(50)  not null,
     county          varchar(50)  not null,
     phone_number    varchar(50)  not null,
-    issue_date      varchar(20)  not null,
-    expiration_date varchar(20)  not null,
-    classification  varchar(20)  not null,
+    issue_date      date  not null,
+    expiration_date date  not null,
+    classification  date  not null,
+    geo_lat         double precision,
+    geo_lng         double precision,
     last_updated    varchar(20)  not null,
     created_at      timestamp    not null,
     updated_at      timestamp    not null,
     created_by      varchar(36),
-    updated_by      varchar(36),
-    geo_lat         double precision,
-    geo_lng         double precision
+    updated_by      varchar(36)
+
 );
 
