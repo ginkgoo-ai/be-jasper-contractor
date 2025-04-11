@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/contractors")
 @RequiredArgsConstructor
 @Tag(name = "Contractor Management", description = "APIs for managing contractors")
-public class ContractrController {
+public class ContractorController {
 
 
 
