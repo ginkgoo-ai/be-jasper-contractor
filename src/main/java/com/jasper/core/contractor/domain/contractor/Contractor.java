@@ -1,20 +1,18 @@
 package com.jasper.core.contractor.domain.contractor;
 
-import com.jasper.core.contractor.domain.BaseLogicalDeleteEntity;
+import com.jasper.core.contractor.domain.BaseAuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Timestamp;
-import java.util.Date;
 
-@Getter
-@Setter
 @Entity
 @Builder
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "contractor")
-public class Contractor extends BaseLogicalDeleteEntity {
+public class Contractor extends BaseAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,17 +28,16 @@ public class Contractor extends BaseLogicalDeleteEntity {
     private String zip;
     private String phoneNumber;
 
-    private String classification;
-
-    private Date issueDate;
-    private Date expirationDate;
-    private Date lastUpdated;
+    private String issueDate;
+    private String expirationDate;
+    private String lastUpdated;
 
     private Double geoLat;
     private Double geoLng;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
-    private String createdBy;
-    private String updatedBy;
+
+    private String dataSource;
+    private String status;
+
+    private String classification;
 
 }
