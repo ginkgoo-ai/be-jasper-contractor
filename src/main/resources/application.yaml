@@ -1,5 +1,4 @@
 app:
-  base-uri: ${SLATE_URI}
 
 server:
   port: ${CORE_CONTRACTOR_PORT}
@@ -11,7 +10,7 @@ spring:
 
   
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?currentSchema=contractor
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?currentSchema=contractor&reWriteBatchedInserts=true
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -27,6 +26,8 @@ spring:
       hibernate.default_schema: contractor
       hibernate.temp.use_jdbc_metadata_defaults: false
       hibernate.jdbc.lob.non_contextual_creation: true
+      hibernate.jdbc.batch_size: 100
+
   
   flyway:
     enabled: true
@@ -66,5 +67,5 @@ logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
     org.springframework.web.cors: ${LOG_LEVEL_SPRING_WEB_CORS:INFO}
-    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:INFO}
+    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:DEBUG}
     com.ginkgooai: ${LOG_LEVEL_GINKGOOAI:DEBUG}
