@@ -73,7 +73,7 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
             contractor.setCreatedAt(LocalDateTime.now());
             contractor.setUpdatedAt(LocalDateTime.now());
 
-            updateGeo(contractor);
+//            updateGeo(contractor);
 //        }
 
         return contractor;

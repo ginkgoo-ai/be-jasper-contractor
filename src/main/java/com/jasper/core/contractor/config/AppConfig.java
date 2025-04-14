@@ -1,6 +1,7 @@
 package com.jasper.core.contractor.config;
 
 import jakarta.annotation.PostConstruct;
+import org.hibernate.query.sqm.function.SqmFunctionDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -8,6 +9,8 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 @Configuration
@@ -32,5 +35,6 @@ public class AppConfig {
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
         return restTemplate;
     }
+
 
 }

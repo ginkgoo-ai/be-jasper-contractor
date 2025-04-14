@@ -4,6 +4,7 @@ import com.jasper.core.contractor.dto.response.CslbContractor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -15,6 +16,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.poi.ss.format.CellFormat;
+import org.apache.poi.ss.format.CellFormatResult;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -33,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 public class CslbClient implements Closeable {
@@ -108,8 +112,7 @@ public class CslbClient implements Closeable {
         CloseableHttpResponse response=client.execute(post);
         String contentType=response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
         if(contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
-            File tmpFile=Files.createTempFile("export",".xlsx").toFile();
-            System.out.println(tmpFile);
+            File tmpFile=new File("D:/"+ UUID.randomUUID().toString()+".xlsx");
             HttpEntity body=response.getEntity();
             IOUtils.copy(body.getContent(),new FileOutputStream(tmpFile));
 
@@ -123,8 +126,8 @@ public class CslbClient implements Closeable {
 
                     try {
                         CslbContractor contractor=new CslbContractor();
-                        CellValue cellValue=evaluator.evaluate(row.getCell(0));
-                        contractor.setLicenseNumber(cellValue.formatAsString());
+                        String licenseNumber=getCellStringValue(row.getCell(0),evaluator);
+                        contractor.setLicenseNumber(licenseNumber);
                         contractor.setLastUpdated(row.getCell(1).getStringCellValue());
                         contractor.setBusinessType(row.getCell(2).getStringCellValue());
                         contractor.setBusinessName(row.getCell(3).getStringCellValue());
@@ -144,13 +147,45 @@ public class CslbClient implements Closeable {
                     }
                 }
             }finally {
-               tmpFile.delete();
+              tmpFile.delete();
             }
 
         }
         IOUtils.close(response);
         return result;
     }
+
+    public static String getCellStringValue(Cell cell,FormulaEvaluator evaluator) {
+        if (cell == null) {
+            return null;
+        }
+
+        switch (cell.getCellType()) {
+            case STRING -> {
+                return StringUtils.trim(cell.getStringCellValue());
+            }
+            case NUMERIC -> {
+                Short dateFormat = cell.getCellStyle().getDataFormat();
+                CellFormat cf = CellFormat.getInstance(String.valueOf(dateFormat));
+                CellFormatResult result = cf.apply(cell);
+                return StringUtils.trim(result.text);
+            }
+            case BOOLEAN -> {
+                return String.valueOf(cell.getBooleanCellValue());
+            }
+            case FORMULA -> {
+
+                Cell refCell = evaluator.evaluateInCell(cell);
+                return StringUtils.trim(getCellStringValue(refCell,evaluator));
+            }
+            default ->
+            {
+                return "";
+            }
+        }
+
+    }
+
 
     @Override
     public void close() throws IOException {

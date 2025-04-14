@@ -1,8 +1,12 @@
 package com.jasper.core.contractor.domain.contractor;
 
 import com.jasper.core.contractor.domain.BaseAuditableEntity;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
+
+import java.util.List;
 
 
 @Entity
@@ -39,5 +43,8 @@ public class Contractor extends BaseAuditableEntity {
     private String status;
 
     private String classification;
+
+    @Type(JsonType.class)
+    private List<String> classificationArray;
 
 }

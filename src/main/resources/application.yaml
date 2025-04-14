@@ -35,12 +35,6 @@ spring:
     baseline-on-migrate: true
     schemas: contractor
     table: flyway_contractor_history
-    
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
 
 management:
   endpoints:
@@ -66,6 +60,6 @@ springdoc:
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
-    org.springframework.web.cors: ${LOG_LEVEL_SPRING_WEB_CORS:INFO}
-    org.springframework.security: ${LOG_LEVEL_SPRING_SECURITY:DEBUG}
-    com.ginkgooai: ${LOG_LEVEL_GINKGOOAI:DEBUG}
+    org.hibernate.engine.QueryParameters: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+    org.hibernate.SQL: debug

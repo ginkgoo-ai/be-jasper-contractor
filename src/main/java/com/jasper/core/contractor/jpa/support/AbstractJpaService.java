@@ -48,7 +48,7 @@ import java.util.Optional;
  * @author Willie Chen
  */
 @Slf4j
-public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extends BaseAuditableEntity, C, U, ER extends AbstractRepository<E, Long>, VR extends AbstractRepository<V, Long>> implements JpaService<E, V, C, U> {
+public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extends BaseAuditableEntity, C, U, ER extends AbstractRepository<E, String>, VR extends AbstractRepository<V, String>> implements JpaService<E, V, C, U> {
 
     /**
      * Entity repository
@@ -92,7 +92,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
     }
 
     @Override
-    public E findById(Long id) {
+    public E findById(String id) {
         Optional<E> optional = entityRepository.findById(id);
         if (optional.isEmpty()) {
             throw new IllegalArgumentException(String.format("%s with id %s was not found", entityClass.getSimpleName(), id));
@@ -101,7 +101,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
     }
 
     @Override
-    public V findViewById(Long id) {
+    public V findViewById(String id) {
         Optional<V> optional = viewRepository.findById(id);
         if (optional.isEmpty()) {
             throw new IllegalArgumentException(String.format("%s with id %s was not found", entityClass.getSimpleName(), id));
@@ -110,7 +110,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
     }
 
     @Override
-    public Optional<E> findOptionalById(Long id) {
+    public Optional<E> findOptionalById(String id) {
         return entityRepository.findById(id);
     }
 
@@ -138,7 +138,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
 
 
     @Override
-    public E update(U request, Long id) {
+    public E update(U request, String id) {
         E entity = entityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(entityClass.getSimpleName(),"id",id));
         Field[] requestFields = request.getClass().getDeclaredFields();
         for (Field sourceField : requestFields) {
@@ -199,7 +199,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
     }
 
     @Override
-    public List<E> findAllById(Iterable<Long> ids) {
+    public List<E> findAllById(Iterable<String> ids) {
         return entityRepository.findAllById(ids);
     }
 
@@ -209,7 +209,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteById(String id) {
         entityRepository.deleteById(id);
     }
 
@@ -219,7 +219,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
     }
 
     @Override
-    public void deleteAllById(Iterable<Long> ids) {
+    public void deleteAllById(Iterable<String> ids) {
         entityRepository.deleteAllById(ids);
     }
 
@@ -230,21 +230,14 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
 
     @Override
     @SuppressWarnings("ALL")
-    public PageResult<V> pagination(QueryableRequest<V> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest, String keyword) {
+    public Page<V> pagination(QueryableRequest<V> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest) {
 
         Pageable pageable = PageableHelper.getPageable(entityClass, paginationRequest, sortRequest);
         Page<V> pageData = viewRepository.findAll(pageable, builder -> {
             Predicate[] customizerPredicates = queryableRequest.getPredicate(builder);
-
-            if (StringUtils.isNotEmpty(keyword)) {
-                Predicate[] orPredicates = PredicateUtils.buildPredicates(queryableRequest.getClass(), builder, keyword);
-                Predicate keywordPredicate = builder.or(orPredicates);
-                customizerPredicates = ArrayUtils.append(customizerPredicates, keywordPredicate);
-            }
-
             return builder.and(Arrays.stream(customizerPredicates).filter(Objects::nonNull).toArray(Predicate[]::new));
         });
-        return new PageResult<>(pageData);
+        return pageData;
     }
 
     @Override

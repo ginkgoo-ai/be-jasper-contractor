@@ -27,12 +27,12 @@ import java.util.Optional;
  * @param <V> View Type
  */
 public interface JpaService<E, V, C, U> {
-    E findById(Long id);
+    E findById(String id);
 
-    V findViewById(Long id);
+    V findViewById(String id);
 
 
-    Optional<E> findOptionalById(Long id);
+    Optional<E> findOptionalById(String id);
 
     Optional<E> findOne(PredicateSupplier<E> supplier);
 
@@ -40,7 +40,7 @@ public interface JpaService<E, V, C, U> {
 
     E create(C request);
 
-    E update(U request, Long id);
+    E update(U request, String id);
 
     List<E> saveAll(Iterable<E> entities);
 
@@ -59,20 +59,19 @@ public interface JpaService<E, V, C, U> {
     List<V> findAllView(PredicateSupplier<V> supplier, SortRequest sortRequest);
 
 
-    List<E> findAllById(Iterable<Long> ids);
+    List<E> findAllById(Iterable<String> ids);
 
     long count();
 
-    void deleteById(Long id);
+    void deleteById(String id);
 
     void delete(E entity);
 
-    void deleteAllById(Iterable<Long> ids);
+    void deleteAllById(Iterable<String> ids);
 
     void deleteAll(Iterable<E> entities);
 
-    PageResult<V> pagination(QueryableRequest<V> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest, String keyword);
+    Page<V> pagination(QueryableRequest<V> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest);
 
-    void checkRelatedRecordBeforeDeleted(List<Long> idList);
 
 }
