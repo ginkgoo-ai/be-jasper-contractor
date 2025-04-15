@@ -88,7 +88,8 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
     private void updateGeo(Contractor contractor) {
         GeocodingService googleMapGeocodingProvider = ApplicationContextUtils.get().getBean(GeocodingService.class);
 
-        Optional<GeoLocation> optionalGeoLocation = googleMapGeocodingProvider.geocode(contractor.getAddress(), contractor.getCity());
+        String address=contractor.getAddress()+", "+contractor.getCity()+", "+contractor.getState();
+        Optional<GeoLocation> optionalGeoLocation = googleMapGeocodingProvider.geocode(address);
         if (optionalGeoLocation.isPresent()) {
             GeoLocation geoLocation = optionalGeoLocation.get();
             contractor.setGeoLat(geoLocation.getLatitude());

@@ -23,7 +23,7 @@ public class FetchDataTask extends RecursiveTask<List<CslbContractor>> {
 
         if (CollectionUtils.isEmpty(classificationList)) {
             return List.of();
-        } else if (classificationList.size() > 10) {
+        } else if (classificationList.size() > 5) {
             int middle = classificationList.size() / 2;
             FetchDataTask left = new FetchDataTask(classificationList.subList(0, middle));
             FetchDataTask right = new FetchDataTask(classificationList.subList(middle, classificationList.size()));
@@ -45,7 +45,7 @@ public class FetchDataTask extends RecursiveTask<List<CslbContractor>> {
             List<String> classificationCodeList = classificationList.stream().map(Classification::getId).toList();
             log.info("Fetch by classification codes: {}", classificationCodeList);
             List<CslbContractor> result = client.search(classificationCodeList);
-            log.info("Fetch result: {}", result.size());
+            log.info("Fetch {} results,\t\tclassifications:{}", result.size(),classificationCodeList);
             return result;
         } catch (IOException e) {
             log.error("Failed to sync data from remote service", e);

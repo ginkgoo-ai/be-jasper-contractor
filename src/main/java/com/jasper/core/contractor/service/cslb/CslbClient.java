@@ -111,9 +111,10 @@ public class CslbClient implements Closeable {
         post.setEntity(entity);
         CloseableHttpResponse response = client.execute(post);
         String contentType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+        HttpEntity body = response.getEntity();
         if (contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
             File tmpFile = Files.createTempFile("cslb_",".xlsx").toFile();
-            HttpEntity body = response.getEntity();
+
             IOUtils.copy(body.getContent(), new FileOutputStream(tmpFile));
 
             try (XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(tmpFile)) {
@@ -148,6 +149,8 @@ public class CslbClient implements Closeable {
                 tmpFile.delete();
             }
 
+        }else{
+            log.warn("Fetch contractors failed. content-type:{} body:{}",contentType,EntityUtils.toString(entity));
         }
         IOUtils.close(response);
         return result;
