@@ -21,4 +21,11 @@ public class InstallController {
         contractorService.sync(clearData);
         return ResponseEntity.ok().body("Installer running...");
     }
+
+    @Operation(hidden = true)
+    @GetMapping("/update-location")
+    public ResponseEntity<String> updateLocation() {
+//        contractorService.sync(clearData);
+        return ResponseEntity.ok().body("Installer running...");
+    }
 }

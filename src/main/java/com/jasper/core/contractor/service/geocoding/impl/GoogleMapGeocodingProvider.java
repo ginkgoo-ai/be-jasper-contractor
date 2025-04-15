@@ -1,4 +1,4 @@
-package com.jasper.core.contractor.service.google;
+package com.jasper.core.contractor.service.geocoding.impl;
 
 import com.jasper.core.contractor.dto.request.Address;
 import com.jasper.core.contractor.dto.request.AddressValidationRequest;
@@ -6,6 +6,7 @@ import com.jasper.core.contractor.dto.response.AddressValidationResponse;
 import com.jasper.core.contractor.dto.response.AddressValidationResult;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.dto.response.Verdict;
+import com.jasper.core.contractor.service.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GoogleMapService {
+public class GoogleMapGeocodingProvider implements GeocodingService {
 
     private static final String API_URL = "https://addressvalidation.googleapis.com/v1:validateAddress?key=";
 
@@ -34,7 +35,8 @@ public class GoogleMapService {
     @Value("${GOOGLE_MAP_API_KEY}")
     private String apiKey;
 
-    public Optional<GeoLocation> validateAddress(String addressLine, String locality) {
+    @Override
+    public Optional<GeoLocation> geocode(String addressLine, String locality) {
         Address address = Address.builder()
                 .regionCode(DEFAULT_REGION_CODE)
                 .locality(locality)
