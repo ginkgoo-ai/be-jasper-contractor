@@ -25,7 +25,7 @@ create EXTENSION if not exists earthdistance;
 --
 -- Name: classification; Type: TABLE; Schema: contractor; Owner: postgres
 --
-
+drop table if exists contractor.classification;
 CREATE TABLE if not exists contractor.classification (
                                            id character varying(36) NOT NULL,
                                            name character varying(255) NOT NULL
@@ -38,7 +38,8 @@ ALTER TABLE contractor.classification OWNER TO postgres;
 -- Name: contractor; Type: TABLE; Schema: contractor; Owner: postgres
 --
 
-CREATE TABLE if not exists contractor.contractor (
+drop table if exists contractor.contractor;
+CREATE TABLE  contractor.contractor (
                                        id character varying(36) NOT NULL,
                                        license_number character varying(255) NOT NULL,
                                        business_type character varying(50),
@@ -67,8 +68,6 @@ CREATE TABLE if not exists contractor.contractor (
 
 ALTER TABLE contractor.contractor OWNER TO postgres;
 
-
-ALTER TABLE contractor.contractor_classification OWNER TO postgres;
 
 --
 -- Data for Name: classification; Type: TABLE DATA; Schema: contractor; Owner: postgres
@@ -154,10 +153,6 @@ INSERT INTO contractor.classification VALUES ('ASB', 'ASB - Asbestos Certificati
 INSERT INTO contractor.classification VALUES ('HAZ', 'HAZ - Hazardous Substance Removal Certification');
 
 
-
---
--- Data for Name: contractor_classification; Type: TABLE DATA; Schema: contractor; Owner: postgres
---
 
 
 --
