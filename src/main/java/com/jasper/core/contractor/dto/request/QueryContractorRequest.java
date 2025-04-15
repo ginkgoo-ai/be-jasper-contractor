@@ -51,7 +51,10 @@ public class QueryContractorRequest implements QueryableRequest<Contractor> {
             predicates.add(builder.when(Contractor::getState).eq(state));
         }
         if (!CollectionUtils.isEmpty(classifications)) {
-            predicates.add(builder.when(Contractor::getClassificationArray).jsonContains(JsonUtils.toJson(classifications)));
+            Predicate[] predicatesArray = classifications.stream()
+                    .map(it-> builder.when(Contractor::getClassificationArray).jsonContains(JsonUtils.toJson(List.of(it))))
+                    .toArray(Predicate[]::new);
+            predicates.add(builder.or(predicatesArray));
         }
         return predicates.toArray(Predicate[]::new);
     }
