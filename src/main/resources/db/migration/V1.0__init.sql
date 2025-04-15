@@ -10,7 +10,7 @@
 -- Name: contractor; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA contractor;
+CREATE SCHEMA if not exists contractor;
 
 
 ALTER SCHEMA contractor OWNER TO postgres;
@@ -26,7 +26,7 @@ create EXTENSION if not exists earthdistance;
 -- Name: classification; Type: TABLE; Schema: contractor; Owner: postgres
 --
 
-CREATE TABLE contractor.classification (
+CREATE TABLE if not exists contractor.classification (
                                            id character varying(36) NOT NULL,
                                            name character varying(255) NOT NULL
 );
@@ -38,7 +38,7 @@ ALTER TABLE contractor.classification OWNER TO postgres;
 -- Name: contractor; Type: TABLE; Schema: contractor; Owner: postgres
 --
 
-CREATE TABLE contractor.contractor (
+CREATE TABLE if not exists contractor.contractor (
                                        id character varying(36) NOT NULL,
                                        license_number character varying(255) NOT NULL,
                                        business_type character varying(50),
