@@ -27,42 +27,42 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GoogleMapService {
 
-    private static final String API_URL="https://addressvalidation.googleapis.com/v1:validateAddress?key=";
+    private static final String API_URL = "https://addressvalidation.googleapis.com/v1:validateAddress?key=";
 
-    private static final String DEFAULT_REGION_CODE="US";
+    private static final String DEFAULT_REGION_CODE = "US";
 
     @Value("${GOOGLE_MAP_API_KEY}")
     private String apiKey;
 
     public Optional<GeoLocation> validateAddress(String addressLine, String locality) {
-        Address address=Address.builder()
+        Address address = Address.builder()
                 .regionCode(DEFAULT_REGION_CODE)
                 .locality(locality)
                 .addressLines(List.of(addressLine))
                 .build();
-        AddressValidationRequest request=AddressValidationRequest
+        AddressValidationRequest request = AddressValidationRequest
                 .builder()
                 .address(address)
                 .build();
 
-        try(CloseableHttpClient client= HttpClients.createDefault()) {
-            HttpPost post=new HttpPost(API_URL+apiKey);
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost post = new HttpPost(API_URL + apiKey);
 
-            StringEntity entity=new StringEntity(JsonUtils.toJson(request),ContentType.APPLICATION_JSON);
+            StringEntity entity = new StringEntity(JsonUtils.toJson(request), ContentType.APPLICATION_JSON);
 
             post.setEntity(entity);
-            CloseableHttpResponse httpResponse=client.execute(post);
-            String responseTxt= EntityUtils.toString(httpResponse.getEntity());
-            AddressValidationResponse response=JsonUtils.parseJson(responseTxt, AddressValidationResponse.class);
-            AddressValidationResult result=response.getResult();
-            if(result!=null){
-                Verdict verdict=result.getVerdict();
-                if(verdict!=null && Boolean.TRUE.equals(verdict.getAddressComplete())){
+            CloseableHttpResponse httpResponse = client.execute(post);
+            String responseTxt = EntityUtils.toString(httpResponse.getEntity());
+            AddressValidationResponse response = JsonUtils.parseJson(responseTxt, AddressValidationResponse.class);
+            AddressValidationResult result = response.getResult();
+            if (result != null) {
+                Verdict verdict = result.getVerdict();
+                if (verdict != null && Boolean.TRUE.equals(verdict.getAddressComplete())) {
                     return Optional.ofNullable(result.getGeocode().getLocation());
                 }
             }
-        }catch (Exception e){
-            log.warn("Validate address failed",e);
+        } catch (Exception e) {
+            log.warn("Validate address failed", e);
         }
 
         return Optional.empty();

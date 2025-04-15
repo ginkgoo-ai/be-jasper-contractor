@@ -12,11 +12,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableFeignClients
 public class JasperCoreContractorApplication {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		ApplicationContext context = SpringApplication.run(JasperCoreContractorApplication.class, args);
-		ApplicationContextUtils.set(context);
+        ApplicationContext context = SpringApplication.run(JasperCoreContractorApplication.class, args);
+        ApplicationContextUtils.set(context);
 
-	}
+    }
 
 }

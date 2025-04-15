@@ -2,6 +2,7 @@ package com.jasper.core.contractor.domain.contractor;
 
 import com.jasper.core.contractor.domain.BaseAuditableEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
@@ -42,6 +43,7 @@ public class Contractor extends BaseAuditableEntity {
     private String dataSource;
     private String status;
 
+    @Parameter(hidden = true)
     private String classification;
 
     @Type(JsonType.class)

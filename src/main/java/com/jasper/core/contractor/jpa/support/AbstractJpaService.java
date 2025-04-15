@@ -12,16 +12,16 @@ package com.jasper.core.contractor.jpa.support;
 import com.ginkgooai.core.common.exception.ResourceNotFoundException;
 import com.jasper.core.contractor.domain.BaseAuditableEntity;
 import com.jasper.core.contractor.jpa.PredicateSupplier;
-import com.jasper.core.contractor.jpa.query.*;
-import com.jasper.core.contractor.utils.ArrayUtils;
-import com.jasper.core.contractor.utils.PredicateUtils;
+import com.jasper.core.contractor.jpa.query.PageableHelper;
+import com.jasper.core.contractor.jpa.query.PaginationRequest;
+import com.jasper.core.contractor.jpa.query.QueryableRequest;
+import com.jasper.core.contractor.jpa.query.SortRequest;
 import com.jasper.core.contractor.utils.StringTools;
 import com.jasper.core.contractor.utils.TypeUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
@@ -139,7 +139,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
 
     @Override
     public E update(U request, String id) {
-        E entity = entityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(entityClass.getSimpleName(),"id",id));
+        E entity = entityRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(entityClass.getSimpleName(), "id", id));
         Field[] requestFields = request.getClass().getDeclaredFields();
         for (Field sourceField : requestFields) {
             ReflectionUtils.makeAccessible(sourceField);
@@ -152,7 +152,7 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
         }
         entity.setUpdatedAt(LocalDateTime.now());
 
-        entity=save(entity);
+        entity = save(entity);
 
         return entity;
     }
@@ -249,7 +249,6 @@ public abstract class AbstractJpaService<E extends BaseAuditableEntity, V extend
             return Optional.of(list.get(0));
         }
     }
-
 
 
 }

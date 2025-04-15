@@ -8,20 +8,16 @@
 
 package com.jasper.core.contractor.jpa;
 
-import com.jasper.core.contractor.jpa.support.*;
+import com.jasper.core.contractor.jpa.support.LambdaMeta;
+import com.jasper.core.contractor.jpa.support.LambdaUtils;
+import com.jasper.core.contractor.jpa.support.PropertyNamer;
+import com.jasper.core.contractor.jpa.support.SFunction;
 import com.jasper.core.contractor.utils.StringTools;
-import io.hypersistence.utils.hibernate.type.json.JsonBlobType;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.Setter;
-import org.hibernate.query.BindableType;
-import org.hibernate.query.sqm.NodeBuilder;
-import org.hibernate.query.sqm.internal.SqmCriteriaNodeBuilder;
-import org.hibernate.query.sqm.tree.expression.SqmExpression;
-import org.hibernate.query.sqm.tree.expression.ValueBindJpaCriteriaParameter;
-import org.hibernate.sql.ast.tree.expression.CastTarget;
-import org.hibernate.type.StandardBasicTypes;
-import org.hibernate.type.descriptor.jdbc.JsonAsStringJdbcType;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -138,11 +134,12 @@ public class PredicateBuilder<T> {
         Assert.notNull(pattern, "value cannot be empty");
         return builder.like(root.get(attributeName), StringTools.likePattern(pattern));
     }
+
     public Predicate jsonContains(String value) {
         Assert.notNull(value, "value cannot be empty");
 
-        Expression<JsonBlobType> cast = builder.function("cast", JsonBlobType.class, root.get(attributeName), builder.literal("as varchar(255)"));
+        Expression<String> cast = builder.function("to_jsonb", String.class, root.get(attributeName));
 
-        return builder.equal( builder.function("jsonb_contains", Boolean.class, cast, builder.literal(value)),true);
+        return builder.isTrue(builder.function("jsonb_contains", Boolean.class, cast, builder.literal(value)));
     }
 }

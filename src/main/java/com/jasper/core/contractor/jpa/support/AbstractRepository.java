@@ -84,4 +84,8 @@ public interface AbstractRepository<T, K> extends JpaRepository<T, K>, JpaSpecif
         return findAll(buildSpecification(supplier), pageable);
     }
 
+    default long delete(@NotNull PredicateSupplier<T> supplier) {
+        return delete(buildSpecification(supplier));
+    }
+
 }

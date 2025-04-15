@@ -8,11 +8,11 @@ public class SortRequest {
      * Order by
      */
 
-    protected String orderBy;
+    protected String sortField;
 
     /**
      * Order type
      */
 
-    protected OrderType orderType;
+    protected OrderType sortDirection;
 }

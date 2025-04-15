@@ -37,7 +37,7 @@ public class JacksonConfig {
 
         @Override
         public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider provider)
-            throws IOException {
+                throws IOException {
             if (value == null) {
                 gen.writeNull();
             } else {

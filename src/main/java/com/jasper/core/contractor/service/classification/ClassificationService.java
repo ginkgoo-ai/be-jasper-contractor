@@ -14,7 +14,7 @@ import java.util.List;
 public class ClassificationService {
     private final ClassificationRepository classificationRepository;
 
-    public List<Classification> queryAll(){
+    public List<Classification> queryAll() {
         return classificationRepository.findAll();
     }
 }

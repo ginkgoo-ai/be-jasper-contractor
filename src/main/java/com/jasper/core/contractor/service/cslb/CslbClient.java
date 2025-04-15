@@ -31,7 +31,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +39,9 @@ import java.util.UUID;
 
 @Slf4j
 public class CslbClient implements Closeable {
-    private static final String HOST="https://www.cslb.ca.gov";
-    private static final String API_URL=HOST+"/onlineservices/dataportal/ListByClassification";
-    private static final String MOCK_UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0";
+    private static final String HOST = "https://www.cslb.ca.gov";
+    private static final String API_URL = HOST + "/onlineservices/dataportal/ListByClassification";
+    private static final String MOCK_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0";
 
     private final CloseableHttpClient client;
 
@@ -51,29 +50,29 @@ public class CslbClient implements Closeable {
     }
 
     private SiteInfo getSiteInfo() throws IOException {
-        HttpGet get=new HttpGet(API_URL);
-        CloseableHttpResponse response=client.execute(get);
+        HttpGet get = new HttpGet(API_URL);
+        CloseableHttpResponse response = client.execute(get);
 
-        Header[] cookies=response.getHeaders(HttpHeaders.SET_COOKIE);
+        Header[] cookies = response.getHeaders(HttpHeaders.SET_COOKIE);
 
-        StringBuilder builder=new StringBuilder();
-        for(Header cookie:cookies){
-            String str=cookie.getValue().substring(0,cookie.getValue().indexOf(";")+1);
+        StringBuilder builder = new StringBuilder();
+        for (Header cookie : cookies) {
+            String str = cookie.getValue().substring(0, cookie.getValue().indexOf(";") + 1);
             builder.append(str);
         }
-        String cookie=  builder.toString();
+        String cookie = builder.toString();
 
-        String html= EntityUtils.toString(response.getEntity());
+        String html = EntityUtils.toString(response.getEntity());
         IOUtils.close(response);
-        Document document= Jsoup.parse(html);
-        Element eventValidationElement=document.getElementById("__EVENTVALIDATION");
-        String eventValidation= Optional.ofNullable(eventValidationElement).orElse(new Element("input")).val();
+        Document document = Jsoup.parse(html);
+        Element eventValidationElement = document.getElementById("__EVENTVALIDATION");
+        String eventValidation = Optional.ofNullable(eventValidationElement).orElse(new Element("input")).val();
 
-        Element viewStateElement=document.getElementById("__VIEWSTATE");
-        String viewState= Optional.ofNullable(viewStateElement).orElse(new Element("input")).val();
+        Element viewStateElement = document.getElementById("__VIEWSTATE");
+        String viewState = Optional.ofNullable(viewStateElement).orElse(new Element("input")).val();
 
-        Element viewStateGeneratorElement=document.getElementById("__VIEWSTATEGENERATOR");
-        String viewStateGenerator=Optional.ofNullable(viewStateGeneratorElement).orElse(new Element("input")).val();
+        Element viewStateGeneratorElement = document.getElementById("__VIEWSTATEGENERATOR");
+        String viewStateGenerator = Optional.ofNullable(viewStateGeneratorElement).orElse(new Element("input")).val();
 
         return SiteInfo.builder()
                 .cookie(cookie)
@@ -83,50 +82,50 @@ public class CslbClient implements Closeable {
                 .build();
     }
 
-    public List<CslbContractor> search(List<String> classificationList) throws IOException{
-        List<CslbContractor>  result=new ArrayList<>();
+    public List<CslbContractor> search(List<String> classificationList) throws IOException {
+        List<CslbContractor> result = new ArrayList<>();
 
-        SiteInfo siteInfo=getSiteInfo();
-        HttpPost post=new HttpPost(API_URL);
+        SiteInfo siteInfo = getSiteInfo();
+        HttpPost post = new HttpPost(API_URL);
 
         post.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-        post.addHeader(HttpHeaders.ORIGIN,HOST);
-        post.addHeader(HttpHeaders.REFERER,API_URL);
-        post.addHeader(HttpHeaders.COOKIE,siteInfo.cookie);
-        post.addHeader(HttpHeaders.USER_AGENT,MOCK_UA);
+        post.addHeader(HttpHeaders.ORIGIN, HOST);
+        post.addHeader(HttpHeaders.REFERER, API_URL);
+        post.addHeader(HttpHeaders.COOKIE, siteInfo.cookie);
+        post.addHeader(HttpHeaders.USER_AGENT, MOCK_UA);
 
-        List<NameValuePair> nameValuePairList=new ArrayList<>();
-        nameValuePairList.add(new BasicNameValuePair("__EVENTTARGET","ctl00$MainContent$btnSearch"));
-        nameValuePairList.add(new BasicNameValuePair("__EVENTARGUMENT",""));
-        for(String classification:classificationList) {
+        List<NameValuePair> nameValuePairList = new ArrayList<>();
+        nameValuePairList.add(new BasicNameValuePair("__EVENTTARGET", "ctl00$MainContent$btnSearch"));
+        nameValuePairList.add(new BasicNameValuePair("__EVENTARGUMENT", ""));
+        for (String classification : classificationList) {
             nameValuePairList.add(new BasicNameValuePair("ctl00$MainContent$lbClassification", classification));
         }
 
-        nameValuePairList.add(new BasicNameValuePair("__VIEWSTATE",siteInfo.viewState));
-        nameValuePairList.add(new BasicNameValuePair("__VIEWSTATEGENERATOR",siteInfo.viewStateGenerator));
-        nameValuePairList.add(new BasicNameValuePair("__EVENTVALIDATION",siteInfo.eventValidation));
+        nameValuePairList.add(new BasicNameValuePair("__VIEWSTATE", siteInfo.viewState));
+        nameValuePairList.add(new BasicNameValuePair("__VIEWSTATEGENERATOR", siteInfo.viewStateGenerator));
+        nameValuePairList.add(new BasicNameValuePair("__EVENTVALIDATION", siteInfo.eventValidation));
 
 
-        UrlEncodedFormEntity entity=new UrlEncodedFormEntity(nameValuePairList);
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nameValuePairList);
         post.setEntity(entity);
-        CloseableHttpResponse response=client.execute(post);
-        String contentType=response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
-        if(contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
-            File tmpFile=new File("D:/"+ UUID.randomUUID().toString()+".xlsx");
-            HttpEntity body=response.getEntity();
-            IOUtils.copy(body.getContent(),new FileOutputStream(tmpFile));
+        CloseableHttpResponse response = client.execute(post);
+        String contentType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
+        if (contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+            File tmpFile = new File("D:/" + UUID.randomUUID().toString() + ".xlsx");
+            HttpEntity body = response.getEntity();
+            IOUtils.copy(body.getContent(), new FileOutputStream(tmpFile));
 
-            SimpleDateFormat format=new SimpleDateFormat("MM/dd/yyyy");
+            SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 
-            try(XSSFWorkbook workbook= (XSSFWorkbook) WorkbookFactory.create(tmpFile)) {
-                FormulaEvaluator evaluator= new XSSFFormulaEvaluator(workbook);
-                Sheet sheet=workbook.getSheetAt(0);
-                for(int i=1;i<=sheet.getLastRowNum();i++){
-                    Row row=sheet.getRow(i);
+            try (XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(tmpFile)) {
+                FormulaEvaluator evaluator = new XSSFFormulaEvaluator(workbook);
+                Sheet sheet = workbook.getSheetAt(0);
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
 
                     try {
-                        CslbContractor contractor=new CslbContractor();
-                        String licenseNumber=getCellStringValue(row.getCell(0),evaluator);
+                        CslbContractor contractor = new CslbContractor();
+                        String licenseNumber = getCellStringValue(row.getCell(0), evaluator);
                         contractor.setLicenseNumber(licenseNumber);
                         contractor.setLastUpdated(row.getCell(1).getStringCellValue());
                         contractor.setBusinessType(row.getCell(2).getStringCellValue());
@@ -142,12 +141,12 @@ public class CslbClient implements Closeable {
                         contractor.setClassification(row.getCell(12).getStringCellValue());
                         contractor.setStatus(row.getCell(13).getStringCellValue());
                         result.add(contractor);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         log.error("Parse excel error at row {}", i, e);
                     }
                 }
-            }finally {
-              tmpFile.delete();
+            } finally {
+                tmpFile.delete();
             }
 
         }
@@ -155,7 +154,7 @@ public class CslbClient implements Closeable {
         return result;
     }
 
-    public static String getCellStringValue(Cell cell,FormulaEvaluator evaluator) {
+    public static String getCellStringValue(Cell cell, FormulaEvaluator evaluator) {
         if (cell == null) {
             return null;
         }
@@ -176,10 +175,9 @@ public class CslbClient implements Closeable {
             case FORMULA -> {
 
                 Cell refCell = evaluator.evaluateInCell(cell);
-                return StringUtils.trim(getCellStringValue(refCell,evaluator));
+                return StringUtils.trim(getCellStringValue(refCell, evaluator));
             }
-            default ->
-            {
+            default -> {
                 return "";
             }
         }
@@ -193,7 +191,7 @@ public class CslbClient implements Closeable {
     }
 
     @Builder
-    private static class SiteInfo{
+    private static class SiteInfo {
         private String cookie;
         private String eventValidation;
         private String viewState;
