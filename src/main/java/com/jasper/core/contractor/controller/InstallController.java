@@ -1,5 +1,6 @@
 package com.jasper.core.contractor.controller;
 
+import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.service.contractor.ContractorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -8,12 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 public class InstallController {
 
     private final ContractorService contractorService;
-
 
     @Operation(hidden = true)
     @GetMapping("/install")
@@ -25,7 +27,7 @@ public class InstallController {
     @Operation(hidden = true)
     @GetMapping("/update-location")
     public ResponseEntity<String> updateLocation() {
-//        contractorService.sync(clearData);
-        return ResponseEntity.ok().body("Installer running...");
+
+        return ResponseEntity.ok().body("");
     }
 }

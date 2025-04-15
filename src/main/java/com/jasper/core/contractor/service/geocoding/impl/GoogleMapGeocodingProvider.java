@@ -36,10 +36,9 @@ public class GoogleMapGeocodingProvider implements GeocodingService {
     private String apiKey;
 
     @Override
-    public Optional<GeoLocation> geocode(String addressLine, String locality) {
+    public Optional<GeoLocation> geocode(String addressLine) {
         Address address = Address.builder()
                 .regionCode(DEFAULT_REGION_CODE)
-                .locality(locality)
                 .addressLines(List.of(addressLine))
                 .build();
         AddressValidationRequest request = AddressValidationRequest
