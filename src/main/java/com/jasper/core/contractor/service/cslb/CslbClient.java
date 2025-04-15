@@ -31,6 +31,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,11 +112,9 @@ public class CslbClient implements Closeable {
         CloseableHttpResponse response = client.execute(post);
         String contentType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
         if (contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
-            File tmpFile = new File("D:/" + UUID.randomUUID().toString() + ".xlsx");
+            File tmpFile = Files.createTempFile("cslb_",".xlsx").toFile();
             HttpEntity body = response.getEntity();
             IOUtils.copy(body.getContent(), new FileOutputStream(tmpFile));
-
-            SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 
             try (XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(tmpFile)) {
                 FormulaEvaluator evaluator = new XSSFFormulaEvaluator(workbook);
