@@ -4,7 +4,8 @@ import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.dto.response.CslbContractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.repository.ContractorRepository;
-import com.jasper.core.contractor.service.google.GoogleMapService;
+
+import com.jasper.core.contractor.service.geocoding.GeocodingService;
 import com.jasper.core.contractor.utils.ApplicationContextUtils;
 import com.jasper.core.contractor.utils.AtomCounter;
 import lombok.extern.slf4j.Slf4j;
@@ -85,9 +86,9 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
 
 
     private void updateGeo(Contractor contractor) {
-        GoogleMapService googleMapService = ApplicationContextUtils.get().getBean(GoogleMapService.class);
+        GeocodingService googleMapGeocodingProvider = ApplicationContextUtils.get().getBean(GeocodingService.class);
 
-        Optional<GeoLocation> optionalGeoLocation = googleMapService.validateAddress(contractor.getAddress(), contractor.getCity());
+        Optional<GeoLocation> optionalGeoLocation = googleMapGeocodingProvider.geocode(contractor.getAddress(), contractor.getCity());
         if (optionalGeoLocation.isPresent()) {
             GeoLocation geoLocation = optionalGeoLocation.get();
             contractor.setGeoLat(geoLocation.getLatitude());

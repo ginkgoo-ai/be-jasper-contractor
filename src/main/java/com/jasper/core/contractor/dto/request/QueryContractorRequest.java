@@ -4,6 +4,8 @@ package com.jasper.core.contractor.dto.request;
 import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.jpa.CriteriaBuilderDelegate;
 import com.jasper.core.contractor.jpa.query.QueryableRequest;
+import com.jasper.core.contractor.utils.StringTools;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
@@ -22,16 +24,27 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "Request parameter for query contractors")
 public class QueryContractorRequest implements QueryableRequest<Contractor> {
 
+    @Schema(description = "The contractor's address")
     @Nonnull
     private String address;
+
+    @Schema(description = "The contractor's locality")
     @Nullable
     private String city;
+
+
+    @Schema(description = "The contractor's State code, not required")
     @Nullable
     private String state;
+
+    @Schema(description = "The contractor's classification, not required")
     @Nullable
     private List<String> classifications;
+
+    @Schema(description = "The region to search specified as a circle, defined by center point and radius in meters.")
     @Nullable
     private Double radius;
 
@@ -43,7 +56,7 @@ public class QueryContractorRequest implements QueryableRequest<Contractor> {
         if(address.indexOf(" ")>0){
             street=address.substring(address.indexOf(" ") + 1);
         }
-        predicates.add(builder.when(Contractor::getAddress).like("%" + street + "%"));
+        predicates.add(builder.when(Contractor::getAddress).ilike(StringTools.likePattern(street)));
         if (StringUtils.isNotBlank(city)) {
             predicates.add(builder.when(Contractor::getCity).eq(city));
         }

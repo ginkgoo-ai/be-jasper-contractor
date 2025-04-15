@@ -18,6 +18,7 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.Setter;
+import org.hibernate.query.sqm.internal.SqmCriteriaNodeBuilder;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -134,12 +135,15 @@ public class PredicateBuilder<T> {
         Assert.notNull(pattern, "value cannot be empty");
         return builder.like(root.get(attributeName), StringTools.likePattern(pattern));
     }
+    public Predicate ilike(String pattern) {
+        Assert.notNull(pattern, "value cannot be empty");
+        SqmCriteriaNodeBuilder sqmCriteriaNodeBuilder=(SqmCriteriaNodeBuilder) builder;
+        return sqmCriteriaNodeBuilder.ilike(root.get(attributeName), pattern);
+    }
 
     public Predicate jsonContains(String value) {
         Assert.notNull(value, "value cannot be empty");
-
         Expression<String> cast = builder.function("to_jsonb", String.class, root.get(attributeName));
-
         return builder.isTrue(builder.function("jsonb_contains", Boolean.class, cast, builder.literal(value)));
     }
 }
