@@ -1,0 +1,1 @@
+update classification set name='B-2 - Residential Remodeling Contractor' where id='B-2';
