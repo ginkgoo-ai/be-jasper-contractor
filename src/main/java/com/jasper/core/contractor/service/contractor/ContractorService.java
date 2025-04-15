@@ -55,8 +55,8 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
     @Transactional
     public void sync(boolean clearData) {
         List<Classification> classificationList = classificationRepository.findAll();
-        if(clearData){
-            long count=contractorRepository.delete(it->it.when(Contractor::getId).isNotNull());
+        if (clearData) {
+            long count = contractorRepository.delete(it -> it.when(Contractor::getId).isNotNull());
             log.info("Total {} contractors be deleted", count);
         }
         long start = System.currentTimeMillis();
