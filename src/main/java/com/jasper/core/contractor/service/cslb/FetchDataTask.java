@@ -45,7 +45,7 @@ public class FetchDataTask extends RecursiveTask<List<CslbContractor>> {
             List<String> classificationCodeList = classificationList.stream().map(Classification::getId).toList();
             log.info("Fetch by classification codes: {}", classificationCodeList);
             List<CslbContractor> result = client.search(classificationCodeList);
-            log.info("Fetch result: {}", result.size());
+            log.info("Fetch result with {}: {}",classificationCodeList, result.size());
             return result;
         } catch (IOException e) {
             log.error("Failed to sync data from remote service", e);
