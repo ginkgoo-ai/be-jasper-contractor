@@ -21,7 +21,7 @@ public class ApplicationCreateRequest {
 
     // Talent Information
     @Schema(description = "List of existing talent IDs for this application. Must provide at least one talent ID.",
-        required = true)
+            required = true)
     @NotEmpty(message = "At least one Talent ID must be provided")
     private List<String> talentIds;
 

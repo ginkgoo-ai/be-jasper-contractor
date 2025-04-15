@@ -12,26 +12,24 @@ package com.jasper.core.contractor.utils;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataValidationHelper;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.Assert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Excel builder
@@ -82,11 +80,12 @@ public class ExcelBuilder implements Closeable {
         footerStyle.setFont(footerFont);
     }
 
-    private Workbook creteWorkbook(){
+    private Workbook creteWorkbook() {
 
-            return new XSSFWorkbook();
+        return new XSSFWorkbook();
 
     }
+
     /**
      * Create a new builder
      *
@@ -122,7 +121,7 @@ public class ExcelBuilder implements Closeable {
      * @return Row
      */
     public Row createHeader(Sheet sheet, List<Object> columns) {
-        Row header = createRow(0, sheet, columns, headerStyle,null);
+        Row header = createRow(0, sheet, columns, headerStyle, null);
         header.setHeight((short) (2 * 256));
         return header;
     }
@@ -135,7 +134,7 @@ public class ExcelBuilder implements Closeable {
      * @return
      */
     public Row createFooter(int rowNumber, Sheet sheet, List<Object> columns) {
-        Row header = createRow(rowNumber, sheet, columns, footerStyle,null);
+        Row header = createRow(rowNumber, sheet, columns, footerStyle, null);
         header.setHeight((short) (2 * 256));
         return header;
     }
@@ -149,7 +148,7 @@ public class ExcelBuilder implements Closeable {
      * @return Row
      */
     public Row createRow(int rowNumber, Sheet sheet, List<Object> columns) {
-        return createRow(rowNumber, sheet, columns, cellStyle,null);
+        return createRow(rowNumber, sheet, columns, cellStyle, null);
     }
 
     /**
@@ -161,7 +160,7 @@ public class ExcelBuilder implements Closeable {
      * @param cellStyle Cell Style
      * @return Row
      */
-    public Row createRow(int rowNumber, Sheet sheet, List<Object> columns, CellStyle cellStyle,List<Short> columnFormats) {
+    public Row createRow(int rowNumber, Sheet sheet, List<Object> columns, CellStyle cellStyle, List<Short> columnFormats) {
         Row row = sheet.createRow(rowNumber);
         Map<Integer, Integer> columnWidthMap = Objects.requireNonNullElse(sheetColumnWidthMap.get(sheet.getSheetName()), new HashMap<>());
         for (int i = 0; i < columns.size(); i++) {
@@ -182,21 +181,23 @@ public class ExcelBuilder implements Closeable {
                 }
             }
             Short columnFormat = null;
-            if(columnFormats!=null){
+            if (columnFormats != null) {
                 columnFormat = columnFormats.get(i);
             }
 
-            createCell(i, row, cellStyle, column,columnFormat);
+            createCell(i, row, cellStyle, column, columnFormat);
         }
         sheetColumnWidthMap.put(sheet.getSheetName(), columnWidthMap);
         return row;
     }
-    public void setColumnWidth(Sheet sheet,int columnIndex,int columnWidth){
+
+    public void setColumnWidth(Sheet sheet, int columnIndex, int columnWidth) {
         Map<Integer, Integer> columnWidthMap = Objects.requireNonNullElse(sheetColumnWidthMap.get(sheet.getSheetName()), new HashMap<>());
         columnWidthMap.put(columnIndex, columnWidth);
         sheet.setColumnWidth(columnIndex, columnWidth);
         sheetColumnWidthMap.put(sheet.getSheetName(), columnWidthMap);
     }
+
     /**
      * Create a cell
      *
@@ -205,12 +206,12 @@ public class ExcelBuilder implements Closeable {
      * @param cellStyle Cell Style
      * @param value     Value
      */
-    private void createCell(int index, Row row, CellStyle cellStyle, Object value,Short columnFormat) {
+    private void createCell(int index, Row row, CellStyle cellStyle, Object value, Short columnFormat) {
         Cell cell = row.createCell(index);
         if (cellStyle != null) {
             cell.setCellStyle(cellStyle);
         }
-        if(value==null){
+        if (value == null) {
             return;
         }
         if (value instanceof BigDecimal decimal) {
@@ -231,13 +232,15 @@ public class ExcelBuilder implements Closeable {
 
 
     }
-    private DataValidationHelper createDataValidationHelper(Sheet sheet){
-        if(sheet instanceof XSSFSheet xssfSheet){
+
+    private DataValidationHelper createDataValidationHelper(Sheet sheet) {
+        if (sheet instanceof XSSFSheet xssfSheet) {
             return new XSSFDataValidationHelper(xssfSheet);
-        }else{
+        } else {
             return new HSSFDataValidationHelper((HSSFSheet) sheet);
         }
     }
+
     public void createTextLengthConstraint(Sheet sheet, short columnIndex, int min, int max, String errorMessage) {
         DataValidationHelper dataValidationHelper = createDataValidationHelper(sheet);
         DataValidationConstraint constraint = dataValidationHelper.createTextLengthConstraint(DataValidationConstraint.OperatorType.BETWEEN, String.valueOf(min), String.valueOf(max));
@@ -252,7 +255,7 @@ public class ExcelBuilder implements Closeable {
     }
 
     public void createRegexConstraint(Sheet sheet, short columnIndex, String regex, String errorMessage) {
-        DataValidationHelper dataValidationHelper = createDataValidationHelper( sheet);
+        DataValidationHelper dataValidationHelper = createDataValidationHelper(sheet);
         DataValidationConstraint constraint = dataValidationHelper.createCustomConstraint(regex);
 
         CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(1, 65535, columnIndex, columnIndex);
@@ -277,7 +280,6 @@ public class ExcelBuilder implements Closeable {
         dataValidation.setSuppressDropDownArrow(true);
         sheet.addValidationData(dataValidation);
     }
-
 
 
     /**

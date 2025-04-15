@@ -12,10 +12,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.flywaydb.core.internal.util.JsonUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -32,21 +32,26 @@ public class QueryContractorRequest implements QueryableRequest<Contractor> {
     private String state;
     @Nullable
     private List<String> classifications;
+    @Nullable
+    private Double radius;
 
 
     @Override
     public Predicate[] getPredicate(CriteriaBuilderDelegate<Contractor> builder) {
         List<Predicate> predicates = new ArrayList<>();
-        String street=address.substring(address.indexOf(" ")+1);
-        predicates.add(builder.when(Contractor::getAddress).like("%"+street+"%"));
-        if(StringUtils.isNotBlank(city)){
+        String street = address;
+        if(address.indexOf(" ")>0){
+            street=address.substring(address.indexOf(" ") + 1);
+        }
+        predicates.add(builder.when(Contractor::getAddress).like("%" + street + "%"));
+        if (StringUtils.isNotBlank(city)) {
             predicates.add(builder.when(Contractor::getCity).eq(city));
         }
-        if(StringUtils.isNotBlank(state)){
+        if (StringUtils.isNotBlank(state)) {
             predicates.add(builder.when(Contractor::getState).eq(state));
         }
-        if(!CollectionUtils.isEmpty(classifications)){
-//            predicates.add(builder.when(Contractor::getClassificationArray).jsonContains("[\"A\"]"));
+        if (!CollectionUtils.isEmpty(classifications)) {
+            predicates.add(builder.when(Contractor::getClassificationArray).jsonContains(JsonUtils.toJson(classifications)));
         }
         return predicates.toArray(Predicate[]::new);
     }

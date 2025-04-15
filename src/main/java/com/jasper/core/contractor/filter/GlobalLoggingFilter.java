@@ -68,7 +68,7 @@ public class GlobalLoggingFilter extends OncePerRequestFilter {
     }
 
     private void logApiCall(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response,
-            long timeElapsed) {
+                            long timeElapsed) {
         try {
             String requestBody = getRequestBody(request);
             String responseBody = getResponseBody(response);

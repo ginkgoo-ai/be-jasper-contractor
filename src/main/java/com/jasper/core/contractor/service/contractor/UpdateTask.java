@@ -3,17 +3,18 @@ package com.jasper.core.contractor.service.contractor;
 import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.dto.response.CslbContractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
-import com.jasper.core.contractor.repository.ContractorClassificationRepository;
 import com.jasper.core.contractor.repository.ContractorRepository;
 import com.jasper.core.contractor.service.google.GoogleMapService;
 import com.jasper.core.contractor.utils.ApplicationContextUtils;
 import com.jasper.core.contractor.utils.AtomCounter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.RecursiveTask;
@@ -22,9 +23,10 @@ import java.util.concurrent.RecursiveTask;
 public class UpdateTask extends RecursiveTask<List<Contractor>> {
     private final List<CslbContractor> cslbContractorList;
     private final AtomCounter counter;
-    public UpdateTask(List<CslbContractor> cslbContractorList,AtomCounter counter) {
-        this.cslbContractorList=cslbContractorList;
-        this.counter=counter;
+
+    public UpdateTask(List<CslbContractor> cslbContractorList, AtomCounter counter) {
+        this.cslbContractorList = cslbContractorList;
+        this.counter = counter;
     }
 
     @Override
@@ -34,8 +36,8 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
             return List.of();
         } else if (cslbContractorList.size() > 1) {
             int middle = cslbContractorList.size() / 2;
-            UpdateTask left = new UpdateTask(cslbContractorList.subList(0, middle),counter);
-            UpdateTask right = new UpdateTask(cslbContractorList.subList(middle, cslbContractorList.size()),counter);
+            UpdateTask left = new UpdateTask(cslbContractorList.subList(0, middle), counter);
+            UpdateTask right = new UpdateTask(cslbContractorList.subList(middle, cslbContractorList.size()), counter);
             left.fork();
             right.fork();
 
@@ -45,15 +47,14 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
             return all;
         } else {
             CslbContractor cslbContractor = cslbContractorList.get(0);
-            Contractor contractor= saveOrUpdate(cslbContractor);
+            Contractor contractor = saveOrUpdate(cslbContractor);
             counter.incrementAndGet();
             return List.of(contractor);
         }
     }
 
     private Contractor saveOrUpdate(CslbContractor dto) {
-        ContractorRepository contractorRepository= ApplicationContextUtils.get().getBean(ContractorRepository.class);
-        ContractorClassificationRepository contractorClassificationRepository= ApplicationContextUtils.get().getBean(ContractorClassificationRepository.class);
+        ContractorRepository contractorRepository = ApplicationContextUtils.get().getBean(ContractorRepository.class);
 
 //        Optional<Contractor> optionalContractor=contractorRepository.findByLicenseNumber(dto.getLicenseNumber());
 //        Contractor contractor;
@@ -67,12 +68,15 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
 //            }
 //        }else{
 
-            Contractor  contractor=new Contractor();
-            BeanUtils.copyProperties(dto,contractor);
-            contractor.setDataSource("CSLB");
-            contractor.setCreatedAt(LocalDateTime.now());
-            contractor.setUpdatedAt(LocalDateTime.now());
-
+        Contractor contractor = new Contractor();
+        BeanUtils.copyProperties(dto, contractor);
+        contractor.setDataSource("CSLB");
+        contractor.setCreatedAt(LocalDateTime.now());
+        contractor.setUpdatedAt(LocalDateTime.now());
+        if (StringUtils.isNotBlank(contractor.getClassification())) {
+            String[] classificationIds = contractor.getClassification().split("\\|");
+            contractor.setClassificationArray(Arrays.stream(classificationIds).filter(StringUtils::isNotBlank).map(String::trim).toList());
+        }
 //            updateGeo(contractor);
 //        }
 
@@ -80,21 +84,21 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
     }
 
 
-    private void updateGeo(Contractor contractor){
-        GoogleMapService googleMapService= ApplicationContextUtils.get().getBean(GoogleMapService.class);
+    private void updateGeo(Contractor contractor) {
+        GoogleMapService googleMapService = ApplicationContextUtils.get().getBean(GoogleMapService.class);
 
-        Optional<GeoLocation> optionalGeoLocation=googleMapService.validateAddress(contractor.getAddress(),contractor.getCity());
-        if(optionalGeoLocation.isPresent()){
-            GeoLocation geoLocation=optionalGeoLocation.get();
+        Optional<GeoLocation> optionalGeoLocation = googleMapService.validateAddress(contractor.getAddress(), contractor.getCity());
+        if (optionalGeoLocation.isPresent()) {
+            GeoLocation geoLocation = optionalGeoLocation.get();
             contractor.setGeoLat(geoLocation.getLatitude());
             contractor.setGeoLng(geoLocation.getLongitude());
             //log.info("Parse address: {}  geo:{}",contractor.getAddress(),geoLocation);
         }
     }
 
-    private boolean isSame(CslbContractor dto,Contractor contractor){
-        CslbContractor dto2=new CslbContractor();
-        BeanUtils.copyProperties(contractor,dto2);
+    private boolean isSame(CslbContractor dto, Contractor contractor) {
+        CslbContractor dto2 = new CslbContractor();
+        BeanUtils.copyProperties(contractor, dto2);
         return dto.equals(dto2);
     }
 }

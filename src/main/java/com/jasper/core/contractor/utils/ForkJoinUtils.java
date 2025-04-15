@@ -34,7 +34,7 @@ public class ForkJoinUtils {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(interruptedException);
         } catch (ExecutionException e) {
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
         return result;
     }

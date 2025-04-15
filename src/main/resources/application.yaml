@@ -60,6 +60,3 @@ springdoc:
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
-    org.hibernate.engine.QueryParameters: debug
-    org.hibernate.type.descriptor.sql.BasicBinder: trace
-    org.hibernate.SQL: debug

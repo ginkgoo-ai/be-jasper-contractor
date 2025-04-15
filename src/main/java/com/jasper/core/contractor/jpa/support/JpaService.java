@@ -9,7 +9,6 @@
 package com.jasper.core.contractor.jpa.support;
 
 import com.jasper.core.contractor.jpa.PredicateSupplier;
-import com.jasper.core.contractor.jpa.query.PageResult;
 import com.jasper.core.contractor.jpa.query.PaginationRequest;
 import com.jasper.core.contractor.jpa.query.QueryableRequest;
 import com.jasper.core.contractor.jpa.query.SortRequest;

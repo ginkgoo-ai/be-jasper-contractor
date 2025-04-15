@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface ClassificationRepository  extends JpaRepository<Classification, String>, JpaSpecificationExecutor<Classification> {
+public interface ClassificationRepository extends JpaRepository<Classification, String>, JpaSpecificationExecutor<Classification> {
 }

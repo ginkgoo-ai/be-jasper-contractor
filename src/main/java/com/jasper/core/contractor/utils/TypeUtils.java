@@ -51,7 +51,7 @@ public class TypeUtils {
     public static <T> T newInstance(Class<T> clzz) {
         try {
             return clzz.getDeclaredConstructor().newInstance();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new InternalServiceException(e.getMessage());
         }
 

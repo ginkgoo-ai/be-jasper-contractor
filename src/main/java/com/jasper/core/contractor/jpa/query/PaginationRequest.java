@@ -23,7 +23,7 @@ public class PaginationRequest {
     @NotNull
     @Schema(description = "The page number")
     @Min(1)
-    protected Integer pageNo = 1;
+    protected Integer page = 1;
 
     /**
      * Page size
@@ -32,6 +32,6 @@ public class PaginationRequest {
     @Min(1)
     @NotNull
     @Schema(description = "The page size")
-    protected Integer pageSize = 10;
+    protected Integer size = 10;
 
 }

@@ -34,10 +34,10 @@ public class PageableHelper {
      */
     @SuppressWarnings("ALL")
     public static <T> Pageable getPageable(Class entityClass, PaginationRequest paginationRequest, SortRequest sortRequest) {
-        Integer pageNo = paginationRequest.getPageNo();
-        Integer pageSize = paginationRequest.getPageSize();
-        String orderBy = sortRequest.getOrderBy();
-        OrderType orderType = sortRequest.getOrderType();
+        Integer pageNo = paginationRequest.getPage();
+        Integer pageSize = paginationRequest.getSize();
+        String orderBy = sortRequest.getSortField();
+        OrderType orderType = sortRequest.getSortDirection();
         if (pageNo == null) {
             pageNo = 1;
         } else if (pageNo < 0) {
@@ -57,13 +57,13 @@ public class PageableHelper {
     public static Sort getSort(Class entityClass, SortRequest sortRequest) {
         Sort sort = Sort.unsorted();
 
-        String orderBy = sortRequest.getOrderBy();
-        OrderType orderType = sortRequest.getOrderType();
+        String orderBy = sortRequest.getSortField();
+        OrderType orderType = sortRequest.getSortDirection();
         if (StringUtils.isNotEmpty(orderBy)) {
             String[] fields = orderBy.split(",");
             for (String field : fields) {
                 if (!existsField(entityClass, field)) {
-                    throw new IllegalArgumentException("Invalid orderBy value: " + field);
+                    throw new IllegalArgumentException("Invalid sort field value: " + field);
                 }
             }
             sort = Sort.by(fields);

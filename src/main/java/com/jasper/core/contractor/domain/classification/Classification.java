@@ -4,13 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
-
-@Builder
-@Setter
-@Getter
+@Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "classification")
 public class Classification {
 
