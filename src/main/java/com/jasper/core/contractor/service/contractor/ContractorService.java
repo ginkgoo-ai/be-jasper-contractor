@@ -174,10 +174,10 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
     @Transactional
     public void sync(boolean clearData) throws IOException {
 //        List<Classification> classificationList = classificationRepository.findAll();
-//        if (clearData) {
-//            long count = contractorRepository.delete(it -> it.when(Contractor::getId).isNotNull());
-//            log.info("Total {} contractors be deleted", count);
-//        }
+        if (clearData) {
+            long count = contractorRepository.delete(it -> it.when(Contractor::getId).isNotNull());
+            log.info("Total {} contractors be deleted", count);
+        }
 //        long start = System.currentTimeMillis();
 //        FetchDataTask task = new FetchDataTask(classificationList);
 //        log.info("Ready to sync contractor,total {} classifications", classificationList.size());
