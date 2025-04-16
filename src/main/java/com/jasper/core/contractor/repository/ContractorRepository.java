@@ -35,15 +35,15 @@ public interface ContractorRepository extends AbstractRepository<Contractor, Str
                     "           and (:classifications is null or jsonb_exists_any(c.classification_array::jsonb, :classifications) ) " +
                     "       ) tmp " +
                     "   ) filtered "+
-                    "where distance <= :radius "+
-                    "order by ?#{#pageable}",
+                    "where (:radius is null or distance <= :radius) "+
+                    "order by ?#{#pageable}\n",
             countQuery = "select count(1) " +
                     "from contractor " +
                     "where (:city is null or city ilike concat('%',:city,'%')) " +
                     "   and (:state is null or state = :state )  " +
                     "   and (:licenseNumber is null or license_number = :licenseNumber )  " +
                     "   and (:classifications is null or jsonb_exists_any(classification_array::jsonb, :classifications) ) " +
-                    "   and earth_distance(ll_to_earth(geo_lat, geo_lng), ll_to_earth(:lat ,:lng )) <= :radius ",
+                    "   and (:radius is null or earth_distance(ll_to_earth(geo_lat, geo_lng), ll_to_earth(:lat ,:lng )) <= :radius ) ",
             nativeQuery = true
     )
     Page<ContractorQueryResult> pagination(@Param("lat") Double lat,
@@ -53,6 +53,6 @@ public interface ContractorRepository extends AbstractRepository<Contractor, Str
                                            @Param("licenseNumber") String licenseNumber,
                                            @Param("state") String state,
                                            @Param("classifications")  String[] classifications,
-                                           @Param("pageable") Pageable pageable);
+                                           Pageable pageable);
 
 }

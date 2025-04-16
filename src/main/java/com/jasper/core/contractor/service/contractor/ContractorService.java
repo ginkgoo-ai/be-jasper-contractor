@@ -2,6 +2,7 @@ package com.jasper.core.contractor.service.contractor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.ginkgooai.core.common.exception.InternalServiceException;
+import com.jasper.core.contractor.domain.classification.Classification;
 import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.domain.contractor.ContractorQueryResult;
 import com.jasper.core.contractor.dto.ResponseFormat;
@@ -27,6 +28,7 @@ import com.jasper.core.contractor.utils.ForkJoinUtils;
 import com.jasper.core.contractor.utils.StringTools;
 import com.jasper.core.contractor.utils.TypeUtils;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -74,6 +76,7 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
 
     private final GeocodingService geocodingService;
 
+    private final EntityManager entityManager;
 
     public Page<ContractorDetail> queryPage(QueryableRequest<Contractor> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest) {
         if (sortRequest.getSortField() == null) {
@@ -83,10 +86,12 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
         QueryContractorRequest queryContractorRequest = (QueryContractorRequest) queryableRequest;
 
         List<String> classificationCodeList = queryContractorRequest.getClassifications();
-        if (CollectionUtils.isEmpty(classificationCodeList)) {
-            throw new IllegalArgumentException("The classification cannot be empty");
+        if(CollectionUtils.isEmpty(classificationCodeList)){
+            classificationCodeList=classificationRepository.findAll().stream().map(Classification::getId).toList();
         }
+
         String[] classificationArray = classificationCodeList.toArray(String[]::new);
+
 
         Page<ContractorQueryResult> queryResult = contractorRepository.pagination(queryContractorRequest.getLatitude(),
                 queryContractorRequest.getLongitude(),
@@ -96,7 +101,8 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
                 queryContractorRequest.getLicenseNumber(),
                 classificationArray,
                 pageable);
-        List<ContractorDetail> records = queryResult.getContent().stream().map(this::convertToVo).toList();
+        //TODO pagination bug will be fix
+        List<ContractorDetail> records = queryResult.getContent().stream().map(this::convertToVo).toList().subList(0,10);
         return new PageImpl<>(records, pageable, queryResult.getTotalElements());
     }
 
