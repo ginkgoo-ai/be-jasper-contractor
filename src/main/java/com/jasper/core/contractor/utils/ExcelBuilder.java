@@ -120,7 +120,7 @@ public class ExcelBuilder implements Closeable {
      * @param columns Column values
      * @return Row
      */
-    public Row createHeader(Sheet sheet, List<Object> columns) {
+    public Row createHeader(Sheet sheet, String[] columns) {
         Row header = createRow(0, sheet, columns, headerStyle, null);
         header.setHeight((short) (2 * 256));
         return header;
@@ -133,7 +133,7 @@ public class ExcelBuilder implements Closeable {
      * @param columns Column values
      * @return
      */
-    public Row createFooter(int rowNumber, Sheet sheet, List<Object> columns) {
+    public Row createFooter(int rowNumber, Sheet sheet,Object[] columns) {
         Row header = createRow(rowNumber, sheet, columns, footerStyle, null);
         header.setHeight((short) (2 * 256));
         return header;
@@ -144,11 +144,11 @@ public class ExcelBuilder implements Closeable {
      *
      * @param rowNumber row number(index base 0)
      * @param sheet     Sheet
-     * @param columns   Column values
+     * @param cells   Column values
      * @return Row
      */
-    public Row createRow(int rowNumber, Sheet sheet, List<Object> columns) {
-        return createRow(rowNumber, sheet, columns, cellStyle, null);
+    public Row createRow(int rowNumber, Sheet sheet, Object[] cells) {
+        return createRow(rowNumber, sheet, cells, cellStyle, null);
     }
 
     /**
@@ -156,17 +156,17 @@ public class ExcelBuilder implements Closeable {
      *
      * @param rowNumber row number(index base 0)
      * @param sheet     Sheet
-     * @param columns   Column values
+     * @param cells   Column values
      * @param cellStyle Cell Style
      * @return Row
      */
-    public Row createRow(int rowNumber, Sheet sheet, List<Object> columns, CellStyle cellStyle, List<Short> columnFormats) {
+    public Row createRow(int rowNumber, Sheet sheet, Object[] cells, CellStyle cellStyle, List<Short> columnFormats) {
         Row row = sheet.createRow(rowNumber);
         Map<Integer, Integer> columnWidthMap = Objects.requireNonNullElse(sheetColumnWidthMap.get(sheet.getSheetName()), new HashMap<>());
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < cells.length; i++) {
 
-            Object column = columns.get(i);
-            String str = column == null ? " " : column.toString();
+            Object cellValue = cells[i];
+            String str = cellValue == null ? " " : cellValue.toString();
             int newWidth = str.getBytes().length * 512;
             int oldWidth = Objects.requireNonNullElse(columnWidthMap.get(i), 0);
             if (newWidth > oldWidth) {
@@ -174,7 +174,7 @@ public class ExcelBuilder implements Closeable {
                 columnWidthMap.put(i, newWidth);
             }
             if (!cellStyle.equals(footerStyle)) {
-                if (i < columns.size() - 1) {
+                if (i < cells.length - 1) {
                     cellStyle.setBorderRight(BorderStyle.NONE);
                 } else {
                     cellStyle.setBorderRight(BorderStyle.THIN);
@@ -185,7 +185,7 @@ public class ExcelBuilder implements Closeable {
                 columnFormat = columnFormats.get(i);
             }
 
-            createCell(i, row, cellStyle, column, columnFormat);
+            createCell(i, row, cellStyle, cellValue, columnFormat);
         }
         sheetColumnWidthMap.put(sheet.getSheetName(), columnWidthMap);
         return row;
