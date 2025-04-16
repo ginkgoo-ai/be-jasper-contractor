@@ -14,10 +14,7 @@ import com.jasper.core.contractor.dto.response.CslbContractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.handle.InstallFinishedEvent;
 import com.jasper.core.contractor.handle.UpdateFinishedEvent;
-import com.jasper.core.contractor.jpa.query.PageableHelper;
-import com.jasper.core.contractor.jpa.query.PaginationRequest;
-import com.jasper.core.contractor.jpa.query.QueryableRequest;
-import com.jasper.core.contractor.jpa.query.SortRequest;
+import com.jasper.core.contractor.jpa.query.*;
 import com.jasper.core.contractor.jpa.support.AbstractJpaService;
 import com.jasper.core.contractor.repository.ClassificationRepository;
 import com.jasper.core.contractor.repository.ContractorRepository;
@@ -29,6 +26,7 @@ import com.jasper.core.contractor.utils.StringTools;
 import com.jasper.core.contractor.utils.TypeUtils;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -48,17 +46,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -79,31 +77,98 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
     private final EntityManager entityManager;
 
     public Page<ContractorDetail> queryPage(QueryableRequest<Contractor> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest) {
-        if (sortRequest.getSortField() == null) {
-            sortRequest.setSortField(DEFAULT_SORT_FIELD);
-        }
+
         Pageable pageable = PageableHelper.getPageable(ContractorQueryResult.class, paginationRequest, sortRequest);
         QueryContractorRequest queryContractorRequest = (QueryContractorRequest) queryableRequest;
 
         List<String> classificationCodeList = queryContractorRequest.getClassifications();
-        if(CollectionUtils.isEmpty(classificationCodeList)){
-            classificationCodeList=classificationRepository.findAll().stream().map(Classification::getId).toList();
+        if (CollectionUtils.isEmpty(classificationCodeList)) {
+            classificationCodeList = classificationRepository.findAll().stream().map(Classification::getId).toList();
         }
 
         String[] classificationArray = classificationCodeList.toArray(String[]::new);
+        StringBuilder whereClause = new StringBuilder(" where id is not null ");
+        if (StringUtils.isNotBlank(queryContractorRequest.getCity())) {
+            whereClause.append(" and c.city ilike concat('%',:city,'%')");
+        }
+        if (StringUtils.isNotBlank(queryContractorRequest.getLicenseNumber())) {
+            whereClause.append(" and c.license_number = :licenseNumber)");
+        }
+        if (!CollectionUtils.isEmpty(queryContractorRequest.getClassifications())) {
+            whereClause.append(" and jsonb_exists_any(c.classification_array::jsonb, :classifications)");
+        }
+
+        String selectSql = "select * from (" +
+                "   select tmp.id,tmp.license_number,tmp.business_type,tmp.business_name,tmp.address,tmp.county," +
+                "       tmp.city,tmp.state,tmp.zip,tmp.phone_number,tmp.issue_date,tmp.expiration_date,tmp.last_updated," +
+                "       tmp.geo_lat,tmp.geo_lng,tmp.data_source,tmp.status,tmp.classification,tmp.classification_array," +
+                "       tmp.created_at,tmp.updated_at,tmp.created_by,tmp.updated_by ";
+        if (queryContractorRequest.getLatitude() != null) {
+            selectSql += " ,      round(earth_distance(ll_to_earth(tmp.geo_lat, tmp.geo_lng), ll_to_earth(:lat ,:lng ))::numeric,2) as distance ";
+        }
+
+        selectSql += "   from (" +
+                "       select * " +
+                "       from contractor c " +
+                whereClause +
+                "       ) tmp " +
+                "   ) filtered ";
+        if (queryContractorRequest.getRadius() != null) {
+            selectSql += " where (:radius is null or distance <= :radius) ";
+        }
+        if (sortRequest.getSortField() == null && queryContractorRequest.getLatitude() != null) {
+            sortRequest.setSortField(DEFAULT_SORT_FIELD);
+        }
+        if (StringUtils.isNotBlank(sortRequest.getSortField())) {
+            OrderType sortDirection = Objects.requireNonNullElse(sortRequest.getSortDirection(), OrderType.ASC);
+            String underscoreCaseString = sortRequest.getSortField().replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+            selectSql += " order by filtered." + underscoreCaseString + " " + sortDirection;
+        }
 
 
-        Page<ContractorQueryResult> queryResult = contractorRepository.pagination(queryContractorRequest.getLatitude(),
-                queryContractorRequest.getLongitude(),
-                queryContractorRequest.getRadius(),
-                queryContractorRequest.getCity(),
-                queryContractorRequest.getState(),
-                queryContractorRequest.getLicenseNumber(),
-                classificationArray,
-                pageable);
-        //TODO pagination bug will be fix
-        List<ContractorDetail> records = queryResult.getContent().stream().map(this::convertToVo).toList().subList(0,10);
-        return new PageImpl<>(records, pageable, queryResult.getTotalElements());
+        String countSql = "select count(1)  from contractor c " + whereClause;
+
+        if (queryContractorRequest.getRadius() != null) {
+            countSql += "   and (:radius is null or earth_distance(ll_to_earth(c.geo_lat, c.geo_lng), ll_to_earth(:lat ,:lng )) <= :radius ) ";
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("radius", queryContractorRequest.getRadius());
+        params.put("lat", queryContractorRequest.getLatitude());
+        params.put("lng", queryContractorRequest.getLongitude());
+        params.put("city", queryContractorRequest.getCity());
+        params.put("state", queryContractorRequest.getState());
+        params.put("licenseNumber", queryContractorRequest.getLicenseNumber());
+        params.put("classifications", classificationArray);
+        params.put("pageable", pageable);
+
+        Query countQuery = entityManager.createNativeQuery(countSql);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            try {
+                countQuery.setParameter(entry.getKey(), entry.getValue());
+            } catch (Exception e) {
+
+            }
+        }
+        Long totalCount = (Long) countQuery.getSingleResult();
+        if (totalCount.intValue() == 0) {
+            return new PageImpl<>(List.of(), pageable, 0);
+        }
+
+        Query selectQuery = entityManager.createNativeQuery(selectSql, ContractorQueryResult.class);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            try {
+                selectQuery.setParameter(entry.getKey(), entry.getValue());
+            } catch (Exception e) {
+
+            }
+        }
+        selectQuery.setFirstResult((int) pageable.getOffset());
+        selectQuery.setMaxResults(pageable.getPageSize());
+        List<ContractorQueryResult> resultList = selectQuery.getResultList();
+
+//
+        List<ContractorDetail> records = resultList.stream().map(this::convertToVo).toList();
+        return new PageImpl<>(records, pageable, totalCount.longValue());
     }
 
     private ContractorDetail convertToVo(ContractorQueryResult it) {
@@ -194,7 +259,7 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
         IOUtils.setByteArrayMaxOverride(300000000);
         try (CslbClient client = new CslbClient();
              InputStream in = classLoader.getResourceAsStream("all.xlsx");
-             XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(in)){
+             XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(in)) {
 
             List<CslbContractor> cslbContractorList = client.parseExcel(workbook);
             cslbContractorList = cslbContractorList.stream().distinct().toList();
@@ -209,7 +274,7 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
             contractorRepository.saveAll(contractorList);
             log.info("Save contractor finished, cost {}ms", (System.currentTimeMillis() - start));
 
-        }finally {
+        } finally {
             applicationContext.publishEvent(new InstallFinishedEvent(this));
         }
 
