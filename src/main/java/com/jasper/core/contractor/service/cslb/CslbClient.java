@@ -84,7 +84,6 @@ public class CslbClient implements Closeable {
     }
 
     public List<CslbContractor> search(List<String> classificationList) throws IOException {
-        List<CslbContractor> result = new ArrayList<>();
 
         SiteInfo siteInfo = getSiteInfo();
         HttpPost post = new HttpPost(API_URL);
@@ -112,47 +111,56 @@ public class CslbClient implements Closeable {
         CloseableHttpResponse response = client.execute(post);
         String contentType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
         HttpEntity body = response.getEntity();
+        List<CslbContractor> result = new ArrayList<>();
+
         if (contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
             File tmpFile = Files.createTempFile("cslb_",".xlsx").toFile();
 
             IOUtils.copy(body.getContent(), new FileOutputStream(tmpFile));
 
             try (XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(tmpFile)) {
-                FormulaEvaluator evaluator = new XSSFFormulaEvaluator(workbook);
-                Sheet sheet = workbook.getSheetAt(0);
-                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                    Row row = sheet.getRow(i);
-
-                    try {
-                        CslbContractor contractor = new CslbContractor();
-                        String licenseNumber = getCellStringValue(row.getCell(0), evaluator);
-                        contractor.setLicenseNumber(licenseNumber);
-                        contractor.setLastUpdated(row.getCell(1).getStringCellValue());
-                        contractor.setBusinessType(row.getCell(2).getStringCellValue());
-                        contractor.setBusinessName(row.getCell(3).getStringCellValue());
-                        contractor.setAddress(row.getCell(4).getStringCellValue());
-                        contractor.setCity(row.getCell(5).getStringCellValue());
-                        contractor.setState(row.getCell(6).getStringCellValue());
-                        contractor.setZip(row.getCell(7).getStringCellValue());
-                        contractor.setCounty(row.getCell(8).getStringCellValue());
-                        contractor.setPhoneNumber(row.getCell(9).getStringCellValue());
-                        contractor.setIssueDate(row.getCell(10).getStringCellValue());
-                        contractor.setExpirationDate(row.getCell(11).getStringCellValue());
-                        contractor.setClassification(row.getCell(12).getStringCellValue());
-                        contractor.setStatus(row.getCell(13).getStringCellValue());
-                        result.add(contractor);
-                    } catch (Exception e) {
-                        log.error("Parse excel error at row {}", i, e);
-                    }
-                }
+                result=parseExcel(workbook);
             } finally {
                 tmpFile.delete();
             }
 
         }else{
-            log.warn("Fetch contractors failed. content-type:{} body:{}",contentType,EntityUtils.toString(entity));
+            log.warn("Fetch contractors failed. content-type:{} body:{}",contentType,EntityUtils.toString(body));
         }
         IOUtils.close(response);
+        return result;
+    }
+
+    public   List<CslbContractor> parseExcel(XSSFWorkbook workbook) {
+        List<CslbContractor> result = new ArrayList<>();
+        FormulaEvaluator evaluator = new XSSFFormulaEvaluator(workbook);
+
+        Sheet sheet = workbook.getSheetAt(0);
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+
+            try {
+                CslbContractor contractor = new CslbContractor();
+                String licenseNumber = getCellStringValue(row.getCell(0), evaluator);
+                contractor.setLicenseNumber(licenseNumber);
+                contractor.setLastUpdated(row.getCell(1).getStringCellValue());
+                contractor.setBusinessType(row.getCell(2).getStringCellValue());
+                contractor.setBusinessName(row.getCell(3).getStringCellValue());
+                contractor.setAddress(row.getCell(4).getStringCellValue());
+                contractor.setCity(row.getCell(5).getStringCellValue());
+                contractor.setState(row.getCell(6).getStringCellValue());
+                contractor.setZip(row.getCell(7).getStringCellValue());
+                contractor.setCounty(row.getCell(8).getStringCellValue());
+                contractor.setPhoneNumber(row.getCell(9).getStringCellValue());
+                contractor.setIssueDate(row.getCell(10).getStringCellValue());
+                contractor.setExpirationDate(row.getCell(11).getStringCellValue());
+                contractor.setClassification(row.getCell(12).getStringCellValue());
+                contractor.setStatus(row.getCell(13).getStringCellValue());
+                result.add(contractor);
+            } catch (Exception e) {
+                log.error("Parse excel error at row {}", i, e);
+            }
+        }
         return result;
     }
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ public class InstallController  {
 
     @Operation(hidden = true)
     @GetMapping("/install")
-    public ResponseEntity<String> install(@RequestParam(defaultValue = "false") boolean clearData) {
+    public ResponseEntity<String> install(@RequestParam(defaultValue = "false") boolean clearData) throws IOException {
         if(installing){
             return ResponseEntity.badRequest().body("Installer is in progress.");
         }
