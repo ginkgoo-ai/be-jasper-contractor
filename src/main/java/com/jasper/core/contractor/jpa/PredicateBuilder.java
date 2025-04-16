@@ -146,4 +146,11 @@ public class PredicateBuilder<T> {
         Expression<String> cast = builder.function("to_jsonb", String.class, root.get(attributeName));
         return builder.isTrue(builder.function("jsonb_contains", Boolean.class, cast, builder.literal(value)));
     }
+
+    public Predicate earthDistance(double latitude, double longitude, double radius) {
+        Expression<Double> contractorLocation = builder.function("ll_to_earth", Double.class, root.get("geoLat"),root.get("geoLng"));
+        Expression<Double> center = builder.function("ll_to_earth", Double.class, builder.literal(latitude),builder.literal(longitude));
+        Expression<Double> function = builder.function("earth_distance", Double.class, contractorLocation,center);
+        return builder.le(function, radius);
+    }
 }

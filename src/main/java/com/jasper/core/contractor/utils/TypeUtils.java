@@ -10,11 +10,13 @@ package com.jasper.core.contractor.utils;
 
 
 import com.ginkgooai.core.common.exception.InternalServiceException;
+import com.jasper.core.contractor.aspect.annotation.ExcelColumn;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TypeUtils {
     private TypeUtils() {
@@ -57,5 +59,41 @@ public class TypeUtils {
 
     }
 
+    public static String[] getExportColumns(Class<?> clzz){
+        List<String> columns = new ArrayList<>();
+        Field[] fields = clzz.getDeclaredFields();
+        for(Field field : fields){
+
+            if(field.isAnnotationPresent(ExcelColumn.class)){
+                ExcelColumn excelColumn=field.getAnnotation(ExcelColumn.class);
+                columns.add(excelColumn.value());
+            }
+        }
+        return columns.toArray(String[]::new);
+    }
+
+    public static List<Object[]> getExportValues(List<?> records){
+        List<Object[]> rows = new ArrayList<>();
+        if(CollectionUtils.isEmpty(records)){
+            return rows;
+        }
+        Class<?> clzz = records.getFirst().getClass();
+
+        Field[] fields = clzz.getDeclaredFields();
+        for(Object record : records){
+            List<Object> row=new ArrayList<>();
+            for(Field field : fields) {
+                if(field.isAnnotationPresent(ExcelColumn.class)){
+                    ReflectionUtils.makeAccessible(field);
+                    Object fieldValue=ReflectionUtils.getField(field, record);
+                    String stringValue=fieldValue==null?"":fieldValue.toString();
+                    row.add(stringValue);
+                }
+            }
+            rows.add(row.toArray(Object[]::new));
+        }
+
+        return rows;
+    }
 
 }

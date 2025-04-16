@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Service
+//@Service
 @RequiredArgsConstructor
 public class GoogleMapGeocodingProvider implements GeocodingService {
 

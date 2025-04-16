@@ -21,11 +21,11 @@ import java.util.Optional;
 import java.util.concurrent.RecursiveTask;
 
 @Slf4j
-public class UpdateTask extends RecursiveTask<List<Contractor>> {
+public class ConvertTask extends RecursiveTask<List<Contractor>> {
     private final List<CslbContractor> cslbContractorList;
     private final AtomCounter counter;
 
-    public UpdateTask(List<CslbContractor> cslbContractorList, AtomCounter counter) {
+    public ConvertTask(List<CslbContractor> cslbContractorList, AtomCounter counter) {
         this.cslbContractorList = cslbContractorList;
         this.counter = counter;
     }
@@ -37,8 +37,8 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
             return List.of();
         } else if (cslbContractorList.size() > 1) {
             int middle = cslbContractorList.size() / 2;
-            UpdateTask left = new UpdateTask(cslbContractorList.subList(0, middle), counter);
-            UpdateTask right = new UpdateTask(cslbContractorList.subList(middle, cslbContractorList.size()), counter);
+            ConvertTask left = new ConvertTask(cslbContractorList.subList(0, middle), counter);
+            ConvertTask right = new ConvertTask(cslbContractorList.subList(middle, cslbContractorList.size()), counter);
             left.fork();
             right.fork();
 
@@ -79,7 +79,6 @@ public class UpdateTask extends RecursiveTask<List<Contractor>> {
             contractor.setClassificationArray(Arrays.stream(classificationIds).filter(StringUtils::isNotBlank).map(String::trim).toList());
         }
 //            updateGeo(contractor);
-//        }
 
         return contractor;
     }
