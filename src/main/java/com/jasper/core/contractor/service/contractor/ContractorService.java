@@ -101,7 +101,8 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
                 queryContractorRequest.getLicenseNumber(),
                 classificationArray,
                 pageable);
-        List<ContractorDetail> records = queryResult.getContent().stream().map(this::convertToVo).toList();
+        //TODO pagination bug will be fix
+        List<ContractorDetail> records = queryResult.getContent().stream().map(this::convertToVo).toList().subList(0,10);
         return new PageImpl<>(records, pageable, queryResult.getTotalElements());
     }
 

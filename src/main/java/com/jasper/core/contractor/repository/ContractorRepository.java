@@ -36,7 +36,7 @@ public interface ContractorRepository extends AbstractRepository<Contractor, Str
                     "       ) tmp " +
                     "   ) filtered "+
                     "where (:radius is null or distance <= :radius) "+
-                    "order by ?#{#pageable}",
+                    "order by ?#{#pageable}\n",
             countQuery = "select count(1) " +
                     "from contractor " +
                     "where (:city is null or city ilike concat('%',:city,'%')) " +
