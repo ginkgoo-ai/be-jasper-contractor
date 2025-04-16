@@ -1,6 +1,7 @@
 package com.jasper.core.contractor.controller;
 
 import brave.http.HttpServerResponse;
+import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.dto.ResponseFormat;
 import com.jasper.core.contractor.dto.request.QueryContractorRequest;
 import com.jasper.core.contractor.domain.contractor.ContractorQueryResult;
@@ -8,6 +9,7 @@ import com.jasper.core.contractor.dto.response.ContractorDetail;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.jpa.query.PaginationRequest;
 import com.jasper.core.contractor.jpa.query.SortRequest;
+import com.jasper.core.contractor.repository.ContractorRepository;
 import com.jasper.core.contractor.service.contractor.ContractorService;
 import com.jasper.core.contractor.service.geocoding.GeocodingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,9 +51,13 @@ public class ContractorController {
                                         @ParameterObject PaginationRequest paginationRequest,
                                         @ParameterObject SortRequest sortRequest) {
         String address = queryContractorRequest.getAddress();
-        GeoLocation geoLocation = geocodingService.geocode(address).orElseThrow(() -> new IllegalArgumentException("Invalid address"));
-        queryContractorRequest.setLatitude(geoLocation.getLatitude());
-        queryContractorRequest.setLongitude(geoLocation.getLongitude());
+        if(address!=null) {
+            GeoLocation geoLocation = geocodingService.geocode(address).orElseThrow(() -> new IllegalArgumentException("Invalid address"));
+            queryContractorRequest.setLatitude(geoLocation.getLatitude());
+            queryContractorRequest.setLongitude(geoLocation.getLongitude());
+        }else if(queryContractorRequest.getRadius() != null ) {
+            throw new IllegalArgumentException("The address is required when the radius is not null");
+        }
         return contractorService.queryPage(queryContractorRequest, paginationRequest, sortRequest);
     }
 
@@ -67,6 +73,18 @@ public class ContractorController {
                        HttpServletResponse response) throws IOException {
 
         contractorService.export(queryContractorRequest,sortRequest,format,response);
+    }
+
+    private final ContractorRepository contractorRepository;
+    @GetMapping("/contractors/test")
+    public String test() throws IOException {
+       List<Contractor> contractorList= contractorRepository.findAll(it->it.when(Contractor::getGeoLat).isNotNull());
+       StringBuilder builder=new StringBuilder();
+       for(Contractor contractor:contractorList) {
+           builder.append("update contractor.contractor set geo_lat="+contractor.getGeoLat()+",geo_lng="+contractor.getGeoLng()+" where license_number='"+contractor.getLicenseNumber()+"';\n");
+        }
+
+       return builder.toString();
     }
 
 }
