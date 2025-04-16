@@ -27,6 +27,10 @@ public class QueryContractorRequest implements QueryableRequest<Contractor> {
     @Nullable
     private String city;
 
+    @Schema(description = "The contractor's county")
+    @Nullable
+    private String county;
+
 
     @Schema(description = "The contractor's State code, not required")
     @Nullable

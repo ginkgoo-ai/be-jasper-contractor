@@ -76,10 +76,9 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
 
     private final EntityManager entityManager;
 
-    public Page<ContractorDetail> queryPage(QueryableRequest<Contractor> queryableRequest, PaginationRequest paginationRequest, SortRequest sortRequest) {
+    public Page<ContractorDetail> queryPage(QueryContractorRequest queryContractorRequest, PaginationRequest paginationRequest, SortRequest sortRequest) {
 
         Pageable pageable = PageableHelper.getPageable(ContractorQueryResult.class, paginationRequest, sortRequest);
-        QueryContractorRequest queryContractorRequest = (QueryContractorRequest) queryableRequest;
 
         List<String> classificationCodeList = queryContractorRequest.getClassifications();
         if (CollectionUtils.isEmpty(classificationCodeList)) {
@@ -96,6 +95,15 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
         }
         if (!CollectionUtils.isEmpty(queryContractorRequest.getClassifications())) {
             whereClause.append(" and jsonb_exists_any(c.classification_array::jsonb, :classifications)");
+        }
+        if (StringUtils.isNotBlank(queryContractorRequest.getCity())) {
+            whereClause.append(" and c.city ilike concat('%',:city,'%')");
+        }
+        if (StringUtils.isNotBlank(queryContractorRequest.getState())) {
+            whereClause.append(" and c.state = :state");
+        }
+        if (StringUtils.isNotBlank(queryContractorRequest.getCounty())) {
+            whereClause.append(" and c.county = :county");
         }
 
         String selectSql = "select * from (" +
@@ -139,6 +147,7 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
         params.put("state", queryContractorRequest.getState());
         params.put("licenseNumber", queryContractorRequest.getLicenseNumber());
         params.put("classifications", classificationArray);
+        params.put("county", queryContractorRequest.getCounty());
         params.put("pageable", pageable);
 
         Query countQuery = entityManager.createNativeQuery(countSql);
@@ -199,6 +208,7 @@ public class ContractorService extends AbstractJpaService<Contractor, Contractor
             Page<ContractorDetail> pageResult = queryPage(queryContractorRequest, paginationRequest, sortRequest);
             contractorDetailList.addAll(pageResult.getContent());
             hasNextPage = pageResult.hasNext();
+            paginationRequest.setPage(paginationRequest.getPage()+1);
         }
 
         String[] columns = TypeUtils.getExportColumns(ContractorDetail.class);
