@@ -12,8 +12,6 @@ import java.sql.Timestamp;
 @Builder
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class ContractorQueryResult {
 
     private String id;
@@ -63,4 +61,59 @@ public class ContractorQueryResult {
     private String updatedBy;
 
     private BigDecimal distance;
+
+    public ContractorQueryResult() {}
+
+    public ContractorQueryResult(String id, String licenseNumber, String businessType, String businessName, String address, String county, String city, String state, String zip, String phoneNumber, String issueDate, String expirationDate, String lastUpdated, Double geoLat, Double geoLng, String dataSource, String status, String classification, String classificationArray, Timestamp createdAt, Timestamp updatedAt, String createdBy, String updatedBy) {
+        this.id = id;
+        this.licenseNumber = licenseNumber;
+        this.businessType = businessType;
+        this.businessName = businessName;
+        this.address = address;
+        this.county = county;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.phoneNumber = phoneNumber;
+        this.issueDate = issueDate;
+        this.expirationDate = expirationDate;
+        this.lastUpdated = lastUpdated;
+        this.geoLat = geoLat;
+        this.geoLng = geoLng;
+        this.dataSource = dataSource;
+        this.status = status;
+        this.classification = classification;
+        this.classificationArray = classificationArray;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+    }
+
+    public ContractorQueryResult(String id, String licenseNumber, String businessType, String businessName, String address, String county, String city, String state, String zip, String phoneNumber, String issueDate, String expirationDate, String lastUpdated, Double geoLat, Double geoLng, String dataSource, String status, String classification, String classificationArray, Timestamp createdAt, Timestamp updatedAt, String createdBy, String updatedBy, BigDecimal distance) {
+        this.id = id;
+        this.licenseNumber = licenseNumber;
+        this.businessType = businessType;
+        this.businessName = businessName;
+        this.address = address;
+        this.county = county;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.phoneNumber = phoneNumber;
+        this.issueDate = issueDate;
+        this.expirationDate = expirationDate;
+        this.lastUpdated = lastUpdated;
+        this.geoLat = geoLat;
+        this.geoLng = geoLng;
+        this.dataSource = dataSource;
+        this.status = status;
+        this.classification = classification;
+        this.classificationArray = classificationArray;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+        this.distance = distance;
+    }
 }

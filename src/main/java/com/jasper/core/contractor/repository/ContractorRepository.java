@@ -38,12 +38,12 @@ public interface ContractorRepository extends AbstractRepository<Contractor, Str
                     "where (:radius is null or distance <= :radius) "+
                     "order by ?#{#pageable}\n",
             countQuery = "select count(1) " +
-                    "from contractor " +
-                    "where (:city is null or city ilike concat('%',:city,'%')) " +
-                    "   and (:state is null or state = :state )  " +
-                    "   and (:licenseNumber is null or license_number = :licenseNumber )  " +
-                    "   and (:classifications is null or jsonb_exists_any(classification_array::jsonb, :classifications) ) " +
-                    "   and (:radius is null or earth_distance(ll_to_earth(geo_lat, geo_lng), ll_to_earth(:lat ,:lng )) <= :radius ) ",
+                    "from contractor c " +
+                    "where (:city is null or c.city ilike concat('%',:city,'%')) " +
+                    "   and (:state is null or c.state = :state )  " +
+                    "   and (:licenseNumber is null or c.license_number = :licenseNumber )  " +
+                    "   and (:classifications is null or jsonb_exists_any(c.classification_array::jsonb, :classifications) ) " +
+                    "   and (:radius is null or earth_distance(ll_to_earth(c.geo_lat, c.geo_lng), ll_to_earth(:lat ,:lng )) <= :radius ) ",
             nativeQuery = true
     )
     Page<ContractorQueryResult> pagination(@Param("lat") Double lat,

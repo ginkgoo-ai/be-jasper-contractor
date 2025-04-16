@@ -75,16 +75,5 @@ public class ContractorController {
         contractorService.export(queryContractorRequest,sortRequest,format,response);
     }
 
-    private final ContractorRepository contractorRepository;
-    @GetMapping("/contractors/test")
-    public String test() throws IOException {
-       List<Contractor> contractorList= contractorRepository.findAll(it->it.when(Contractor::getGeoLat).isNotNull());
-       StringBuilder builder=new StringBuilder();
-       for(Contractor contractor:contractorList) {
-           builder.append("update contractor.contractor set geo_lat="+contractor.getGeoLat()+",geo_lng="+contractor.getGeoLng()+" where license_number='"+contractor.getLicenseNumber()+"';\n");
-        }
-
-       return builder.toString();
-    }
 
 }
