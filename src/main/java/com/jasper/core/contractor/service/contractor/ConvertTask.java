@@ -91,8 +91,8 @@ public class ConvertTask extends RecursiveTask<List<Contractor>> {
         Optional<GeoLocation> optionalGeoLocation = googleMapGeocodingProvider.geocode(address);
         if (optionalGeoLocation.isPresent()) {
             GeoLocation geoLocation = optionalGeoLocation.get();
-            contractor.setGeoLat(geoLocation.getLatitude());
-            contractor.setGeoLng(geoLocation.getLongitude());
+            contractor.setGeoLat(geoLocation.getLat());
+            contractor.setGeoLng(geoLocation.getLng());
             //log.info("Parse address: {}  geo:{}",contractor.getAddress(),geoLocation);
         }
     }

@@ -60,9 +60,10 @@ public class UpdateGeoTask extends RecursiveTask<List<Contractor>> {
         Optional<GeoLocation> optionalGeoLocation = geocodingService.geocode(address);
         if (optionalGeoLocation.isPresent()) {
             GeoLocation geoLocation = optionalGeoLocation.get();
-            contractor.setGeoLat(geoLocation.getLatitude());
-            contractor.setGeoLng(geoLocation.getLongitude());
-
+            contractor.setGeoLat(geoLocation.getLat());
+            contractor.setGeoLng(geoLocation.getLng());
+        }else{
+            log.info("Geocoding failed,id={}, address:{}",contractor.getId(),contractor.getAddress());
         }
     }
 

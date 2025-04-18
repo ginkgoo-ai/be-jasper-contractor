@@ -53,8 +53,8 @@ public class ContractorController {
         String address = queryContractorRequest.getAddress();
         if(address!=null) {
             GeoLocation geoLocation = geocodingService.geocode(address).orElseThrow(() -> new IllegalArgumentException("Invalid address"));
-            queryContractorRequest.setLatitude(geoLocation.getLatitude());
-            queryContractorRequest.setLongitude(geoLocation.getLongitude());
+            queryContractorRequest.setLatitude(geoLocation.getLat());
+            queryContractorRequest.setLongitude(geoLocation.getLng());
         }else if(queryContractorRequest.getRadius() != null ) {
             throw new IllegalArgumentException("The address is required when the radius is not null");
         }
