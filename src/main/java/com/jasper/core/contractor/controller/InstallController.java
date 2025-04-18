@@ -1,5 +1,6 @@
 package com.jasper.core.contractor.controller;
 
+import com.ginkgooai.core.common.exception.InternalServiceException;
 import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.handle.InstallFinishedEvent;
@@ -42,12 +43,16 @@ public class InstallController  {
     @GetMapping("/update-location")
     public ResponseEntity<String> updateLocation(@RequestParam(required = false) String county,
                                                  @RequestParam(required = false) String city,
-                                                 @RequestParam int targetCount) {
+                                                 @RequestParam int targetCount) throws Exception {
         if(updating){
             return ResponseEntity.badRequest().body("Installer is in progress.");
         }
         updating=true;
         List<Contractor> contractorList  = contractorService.query(county, city, targetCount);
+        if (contractorList.size() != targetCount) {
+            updating=false;
+            throw new InternalServiceException("Contractor count mismatch");
+        }
         contractorService.updateGeoLocation(contractorList);
         return ResponseEntity.ok().body(targetCount+" records updating...");
     }

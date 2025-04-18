@@ -4,14 +4,14 @@ import lombok.Data;
 
 @Data
 public class GeoLocation {
-    private double longitude;
-    private double latitude;
+    private double lng;
+    private double lat;
 
     @Override
     public String toString() {
         return "GeoLocation{" +
-                "lng=" + longitude +
-                ", lat=" + latitude +
+                "lng=" + lng +
+                ", lat=" + lat +
                 '}';
     }
 }
