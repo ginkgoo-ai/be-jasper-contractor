@@ -4,7 +4,6 @@ import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.dto.response.CslbContractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.repository.ContractorRepository;
-
 import com.jasper.core.contractor.service.geocoding.GeocodingService;
 import com.jasper.core.contractor.utils.ApplicationContextUtils;
 import com.jasper.core.contractor.utils.AtomCounter;

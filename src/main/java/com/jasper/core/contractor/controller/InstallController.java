@@ -2,13 +2,11 @@ package com.jasper.core.contractor.controller;
 
 import com.ginkgooai.core.common.exception.InternalServiceException;
 import com.jasper.core.contractor.domain.contractor.Contractor;
-import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.handle.InstallFinishedEvent;
 import com.jasper.core.contractor.handle.UpdateFinishedEvent;
 import com.jasper.core.contractor.service.contractor.ContractorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor

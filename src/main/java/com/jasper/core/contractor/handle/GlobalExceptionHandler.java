@@ -1,7 +1,6 @@
 package com.jasper.core.contractor.handle;
 
 import com.ginkgooai.core.common.exception.BaseRuntimeException;
-import com.ginkgooai.core.common.exception.ProblemDetailBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
