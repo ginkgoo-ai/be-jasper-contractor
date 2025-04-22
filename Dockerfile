@@ -25,4 +25,4 @@ RUN apt-get update && \
     apt-get purge -y --auto-remove curl && \
     rm -rf /var/lib/apt/lists/*
 
-CMD ["sh", "-c", "java -Xms128m -Xmx1024m -javaagent:${GRAFANA_OTEL_JAR} -jar app.jar"]
+CMD ["sh", "-c", "java -Xms1024m -Xmx4096m -javaagent:${GRAFANA_OTEL_JAR} -jar app.jar"]
