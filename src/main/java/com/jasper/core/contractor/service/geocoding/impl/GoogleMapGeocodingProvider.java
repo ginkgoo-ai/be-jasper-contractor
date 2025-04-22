@@ -1,17 +1,14 @@
 package com.jasper.core.contractor.service.geocoding.impl;
 
-import com.jasper.core.contractor.dto.request.Address;
-import com.jasper.core.contractor.dto.request.AddressValidationRequest;
-import com.jasper.core.contractor.dto.response.*;
+import com.jasper.core.contractor.dto.response.GeoLocation;
+import com.jasper.core.contractor.dto.response.GoogleGeocodingResponse;
+import com.jasper.core.contractor.dto.response.GoogleGeocodingResult;
 import com.jasper.core.contractor.service.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;

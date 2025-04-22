@@ -1,20 +1,14 @@
 package com.jasper.core.contractor.service.contractor;
 
 import com.jasper.core.contractor.domain.contractor.Contractor;
-import com.jasper.core.contractor.dto.response.CslbContractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
-import com.jasper.core.contractor.repository.ContractorRepository;
 import com.jasper.core.contractor.service.geocoding.GeocodingService;
 import com.jasper.core.contractor.utils.ApplicationContextUtils;
 import com.jasper.core.contractor.utils.AtomCounter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.RecursiveTask;

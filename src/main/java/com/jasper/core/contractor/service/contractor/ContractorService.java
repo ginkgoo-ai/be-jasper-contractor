@@ -1,7 +1,6 @@
 package com.jasper.core.contractor.service.contractor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.ginkgooai.core.common.exception.InternalServiceException;
 import com.jasper.core.contractor.domain.classification.Classification;
 import com.jasper.core.contractor.domain.contractor.Contractor;
 import com.jasper.core.contractor.domain.contractor.ContractorQueryResult;
@@ -14,18 +13,19 @@ import com.jasper.core.contractor.dto.response.CslbContractor;
 import com.jasper.core.contractor.dto.response.GeoLocation;
 import com.jasper.core.contractor.handle.InstallFinishedEvent;
 import com.jasper.core.contractor.handle.UpdateFinishedEvent;
-import com.jasper.core.contractor.jpa.query.*;
+import com.jasper.core.contractor.jpa.query.OrderType;
+import com.jasper.core.contractor.jpa.query.PageableHelper;
+import com.jasper.core.contractor.jpa.query.PaginationRequest;
+import com.jasper.core.contractor.jpa.query.SortRequest;
 import com.jasper.core.contractor.jpa.support.AbstractJpaService;
 import com.jasper.core.contractor.repository.ClassificationRepository;
 import com.jasper.core.contractor.repository.ContractorRepository;
 import com.jasper.core.contractor.service.cslb.CslbClient;
 import com.jasper.core.contractor.service.geocoding.GeocodingService;
-import com.jasper.core.contractor.service.geocoding.impl.GoogleMapGeocodingProvider;
 import com.jasper.core.contractor.utils.ExcelBuilder;
 import com.jasper.core.contractor.utils.ForkJoinUtils;
 import com.jasper.core.contractor.utils.StringTools;
 import com.jasper.core.contractor.utils.TypeUtils;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.Predicate;
@@ -37,7 +37,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
-
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -47,14 +46,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.*;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;

@@ -3,7 +3,6 @@ package com.jasper.core.contractor.domain.contractor;
 import com.jasper.core.contractor.domain.BaseAuditableEntity;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;

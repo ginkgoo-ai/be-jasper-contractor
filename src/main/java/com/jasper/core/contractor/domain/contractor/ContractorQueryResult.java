@@ -1,9 +1,9 @@
 package com.jasper.core.contractor.domain.contractor;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
-
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
